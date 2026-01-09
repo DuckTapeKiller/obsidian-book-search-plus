@@ -290,7 +290,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
 
     calibreServerUrlSetting = new Setting(containerEl)
       .setName("Calibre server URL")
-      .setDesc("Enter the URL of your Calibre Content Server.")
+      .setDesc("Enter the URL of your Calibre content server.")
       .addText((text) =>
         text
           .setPlaceholder("http://localhost:8080")
@@ -304,7 +304,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     calibreLibraryIdSetting = new Setting(containerEl)
       .setName("Calibre library ID")
       .setDesc(
-        "Enter the Library ID (default: calibre). This is usually the folder name of your library.",
+        "Enter the library ID (default: calibre). This is usually the folder name of your library.",
       )
       .addText((text) =>
         text
@@ -427,15 +427,15 @@ export class BookSearchSettingTab extends PluginSettingTab {
     // Google API Settings
     this.createHeader("Google API settings", containerEl);
     new Setting(containerEl)
-      .setName("Description about Google API settings")
+      .setName("Google API settings description")
       .setDesc(
-        "**WARNING** please use this field after you must understand Google Cloud API, such as API key security.",
+        "**Warning** please use this field after you must understand Google Cloud API, such as API key security.",
       );
 
     new Setting(containerEl)
       .setName("Status check")
       .setDesc(
-        "check whether API key is saved. It does not guarantee that the API key is valid or invalid.",
+        "Check whether API key is saved. It does not guarantee that the API key is valid or invalid.",
       )
       .addButton((button) => {
         button.setButtonText("API check").onClick(() => {
@@ -467,7 +467,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
           this.plugin.settings.apiKey = tempKeyValue;
           void this.plugin
             .saveSettings()
-            .then(() => new Notice("API key Saved"));
+            .then(() => new Notice("API key saved"));
         });
       });
 
