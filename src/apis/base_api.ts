@@ -5,6 +5,7 @@ import { requestUrl } from "obsidian";
 import { GoogleBooksApi } from "./google_books_api";
 import { GoodreadsApi } from "./goodreads_api";
 import { CalibreApi } from "./calibre_api";
+import { OpenLibraryApi } from "./open_library_api";
 
 export interface BaseBooksApiImpl {
   getByQuery(query: string, options?: Record<string, string>): Promise<Book[]>;
@@ -33,6 +34,8 @@ export function factoryServiceProvider(
         settings.calibreServerUrl,
         settings.calibreLibraryId,
       );
+    case ServiceProvider.openlibrary:
+      return new OpenLibraryApi();
     default:
       throw new Error("Unsupported service provider.");
   }

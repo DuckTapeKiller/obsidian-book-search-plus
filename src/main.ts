@@ -10,6 +10,7 @@ import { factoryServiceProvider } from "@apis/base_api";
 
 import { BookSearchModal } from "@views/book_search_modal";
 import { BookSuggestModal } from "@views/book_suggest_modal";
+import { ServiceSelectionModal } from "@views/service_selection_modal";
 import { CursorJumper } from "@utils/cursor_jumper";
 import { Book } from "@models/book.model";
 import {
@@ -28,6 +29,7 @@ import {
   makeFileName,
   applyDefaultFrontMatter,
   toStringFrontMatter,
+  createBookTags,
 } from "@utils/utils";
 
 export default class BookSearchPlugin extends Plugin {
@@ -110,6 +112,9 @@ export default class BookSearchPlugin extends Plugin {
       frontmatter, // @deprecated
       content, // @deprecated
     } = this.settings;
+
+    // Generate tags automatically as requested
+    book.tags = createBookTags(book);
 
     let contentBody = "";
 
@@ -297,34 +302,6 @@ export default class BookSearchPlugin extends Plugin {
   }
 
   selectServiceAndSearch(event?: MouseEvent) {
-    const menu = new Menu();
-    const services = [
-      { label: "Google Books", value: "google" },
-      { label: "Goodreads", value: "goodreads" },
-      { label: "Calibre", value: "calibre" },
-    ];
-
-    services.forEach((service) => {
-      menu.addItem((item) =>
-        item
-          .setTitle(service.label)
-          .setIcon("search")
-          .onClick(() => {
-            void this.createNewBookNote(service.value).catch((err) =>
-              console.warn(err),
-            );
-          }),
-      );
-    });
-
-    // Show menu at cursor position or center if no event
-    if (event) {
-      menu.showAtMouseEvent(event);
-    } else {
-      // Fallback if triggered via command without mouse event, mostly shouldn't happen for ribbon click
-      // just default to normal flow or maybe show a modal?
-      // For now let's just default to settings or show centered if possible (but Menu needs position)
-      // Actually ribbon click always has event.
-    }
+    new ServiceSelectionModal(this).open();
   }
 }

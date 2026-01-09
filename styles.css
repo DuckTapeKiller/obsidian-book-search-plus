@@ -6,9 +6,11 @@
   padding-bottom: 0;
   margin-bottom: 0;
 }
+
 .book-search-plugin__settings--new_file_name_hint {
   margin-bottom: 20px;
 }
+
 .book-search-plugin__settings--service_provider .dropdown {
   text-transform: capitalize;
 }
@@ -24,6 +26,7 @@
 .book-search-plugin__search-modal--input {
   padding-bottom: 18px;
 }
+
 .book-search-plugin__search-modal--input input {
   width: 100%;
 }
@@ -44,4 +47,71 @@
 
 .book-text-info {
   flex-grow: 1;
+}
+
+/* Service Selection Modal Styling */
+.modal.book-search-service-selection-modal {
+  width: 250px !important;
+  height: 250px !important;
+  min-width: 250px !important;
+  max-width: 90vw;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  /* Inherit border-radius from theme */
+}
+
+.modal.book-search-service-selection-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-normal);
+  text-align: center;
+}
+
+.service-selection-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.service-selection-buttons button {
+  width: 140px;
+  /* Fixed smaller width to fit narrower modal */
+  height: 32px;
+  justify-content: center;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+  /* Inherit border-radius from theme */
+}
+
+.service-selection-buttons button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Modal Title Styling */
+.book-search-plugin__search-modal--title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.book-search-plugin__search-modal--title strong {
+  font-size: 1.4em;
+  /* Bigger Service Name */
+  display: block;
+  margin-bottom: 5px;
+}
+
+.book-search-plugin__search-modal--title div {
+  font-size: 1.2em;
+  /* Bigger 'Search book' text */
+  color: var(--text-muted);
 }

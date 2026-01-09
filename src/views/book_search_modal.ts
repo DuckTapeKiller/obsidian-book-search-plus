@@ -68,7 +68,17 @@ export class BookSearchModal extends Modal {
     const service =
       this.plugin.serviceProviderOverride ||
       this.plugin.settings.serviceProvider;
-    contentEl.createEl("h2", { text: `Search book (${service})` });
+
+    // Requested format: Service Name (bold) \n Search book
+    const titleContainer = contentEl.createDiv({
+      cls: "book-search-plugin__search-modal--title",
+    });
+    titleContainer.createEl("strong", {
+      text:
+        (service as string).charAt(0).toUpperCase() +
+        (service as string).slice(1),
+    });
+    titleContainer.createEl("div", { text: "Search book" });
 
     if (
       (service as ServiceProvider) === ServiceProvider.google &&
@@ -81,7 +91,7 @@ export class BookSearchModal extends Modal {
       (el) => {
         new TextComponent(el)
           .setValue(this.query)
-          .setPlaceholder("Book title or ISBN")
+          .setPlaceholder("Search by keyword or ISBN")
           .onChange((value) => (this.query = value))
           .inputEl.addEventListener("keydown", (event) => {
             if (event.key === "Enter" && !event.isComposing) {

@@ -140,23 +140,24 @@ export class GoodreadsApi implements BaseBooksApiImpl {
     );
     const category = categories.join(", ");
 
-    // 5. ASIN
-    let asin = $('span[data-testid="asin"]').first().text().trim();
+    // 5. ASIN (User selector: {{selector:span[data-testid="asin"]|first|trim}})
+    const asin = $('span[data-testid="asin"]').first().text().trim();
 
-    // 6. Data from __NEXT_DATA__ (Original Title, Publisher, ISBNs, Publication Date)
+    // 6. Data from __NEXT_DATA__
     const scriptContent = $("#__NEXT_DATA__").html();
     let originalTitle = "";
     let publisher = "";
     let isbn10 = "";
     let isbn13 = "";
     let publishDate = "";
-    let totalPage = "";
+    let totalPage = ""; // Initialize empty
     let coverUrl = "";
 
     if (scriptContent) {
       try {
-        // 1. Original Title
-        // Simplified Regex: /"originalTitle":"(.*?)"/
+        // 1. Original Title (User regex)
+        // Regex: /.*"Work:.*?"details":.*?"originalTitle":"(.*?)".*/
+        // We use a safe approach to match the user's requested pattern structure
         const originalTitleMatch = scriptContent.match(
           /.*"Work:.*?"details":.*?"originalTitle":"(.*?)".*/,
         );
@@ -165,21 +166,18 @@ export class GoodreadsApi implements BaseBooksApiImpl {
         }
 
         // 2. Publisher
-        // Simplified Regex: /"publisher":"(.*?)"/
         const publisherMatch = scriptContent.match(/"publisher":"(.*?)"/);
         if (publisherMatch && publisherMatch[1]) {
           publisher = publisherMatch[1];
         }
 
         // 3. ISBN 10
-        // Simplified Regex: /"isbn":"(.*?)"/
         const isbn10Match = scriptContent.match(/"isbn":"(.*?)"/);
         if (isbn10Match && isbn10Match[1]) {
           isbn10 = isbn10Match[1];
         }
 
         // 4. Publication Date
-        // Simplified Regex: /"publicationTime":(-?\d+)/ (handles negative timestamps for pre-1970)
         const pubDateMatch = scriptContent.match(/"publicationTime":(-?\d+)/);
         if (pubDateMatch && pubDateMatch[1]) {
           const timestamp = parseInt(pubDateMatch[1], 10);
@@ -191,27 +189,12 @@ export class GoodreadsApi implements BaseBooksApiImpl {
             publishDate = `${year}/${month}/${day}`;
           }
         }
-
-        // 5. ASIN (Fallback if span not found)
-        // Simplified Regex: /"asin":"(.*?)"/
-        if (!asin) {
-          const asinMatch = scriptContent.match(/"asin":"(.*?)"/);
-          if (asinMatch && asinMatch[1]) {
-            asin = asinMatch[1];
-          }
-        }
       } catch (e) {
         console.warn("Goodreads Regex parse error", e);
       }
     }
 
-    // ISBN 10 Fallback / Cleanup
-    // User regex: selector:#__NEXT_DATA__|replace:"/.*BookDetails.*?\"isbn\":\"(.*?)\".*/":"$1"
-    // I handled this above.
-
-    // ISBN 13
-    // User value: {{schema:isbn}}
-    // Try to find schema.org script
+    // ISBN 13 & Pages (User Schema: {{schema:numberOfPages}})
     $('script[type="application/ld+json"]').each((_, el) => {
       try {
         const data = JSON.parse($(el).html() || "{}");
@@ -227,10 +210,8 @@ export class GoodreadsApi implements BaseBooksApiImpl {
       }
     });
 
-    // Páginas (fallback if not in schema)
+    // Pages (fallback if not in schema)
     if (!totalPage) {
-      // User regex: {{schema:numberOfPages}} which I tried above.
-      // Fallback to text
       const pagesText = $('p[data-testid="pagesFormat"]').text();
       if (pagesText) {
         totalPage = pagesText.split(" ")[0];

@@ -40,7 +40,26 @@ export interface BookSearchPluginSettings {
 export const DEFAULT_SETTINGS: BookSearchPluginSettings = {
   folder: "",
   fileNameFormat: "",
-  frontmatter: "",
+  frontmatter: `---
+Título: "{{title}}"
+Título original: "{{originalTitle}}"
+Autor (a): "{{author}}"
+Traductor (a):
+Prólogo:
+Resumen: "{{description}}"
+Páginas: "{{totalPage}}"
+Editorial: "{{publisher}}"
+Género: "{{category}}"
+isbn 10: "{{isbn10}}"
+isbn 13: "{{isbn13}}"
+ASIN: "{{asin}}"
+Fecha de publicación: "{{publishDate}}"
+Fecha de lectura:
+Portada: "{{localCoverImage}}"
+tags:
+Resaltado:
+Leído: false
+---`,
   content: "",
   useDefaultFrontmatter: true,
   defaultFrontmatterKeyType: DefaultFrontmatterKeyType.camelCase,
@@ -104,7 +123,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setClass("book-search-plugin__settings--new_file_name")
       .setName("New file name")
-      .setDesc("The file name format.")
+      .setDesc("Enter the file name format.")
       .addSearch((cb) => {
         try {
           new FileNameFormatSuggest(this.app, cb.inputEl);
@@ -242,6 +261,11 @@ export class BookSearchSettingTab extends PluginSettingTab {
         hideServiceProviderExtraSettingDropdown();
         hideCoverImageEdgeCurlToggle();
         showCalibreSettings();
+      } else if (serviceProvider === ServiceProvider.openlibrary) {
+        hideServiceProviderExtraSettingButton();
+        showServiceProviderExtraSettingDropdown();
+        showCoverImageEdgeCurlToggle();
+        hideCalibreSettings();
       } else {
         hideServiceProviderExtraSettingButton();
         showServiceProviderExtraSettingDropdown();
@@ -269,6 +293,10 @@ export class BookSearchSettingTab extends PluginSettingTab {
           ServiceProvider.calibre,
           `${ServiceProvider.calibre} (Local Server)`,
         );
+        dropDown.addOption(
+          ServiceProvider.openlibrary,
+          `${ServiceProvider.openlibrary} (Public API)`,
+        );
         dropDown.setValue(
           this.plugin.settings?.serviceProvider ?? ServiceProvider.google,
         );
@@ -290,10 +318,10 @@ export class BookSearchSettingTab extends PluginSettingTab {
 
     calibreServerUrlSetting = new Setting(containerEl)
       .setName("Calibre server URL")
-      .setDesc("The URL of your Calibre content server")
+      .setDesc("Enter the URL of your Calibre content server.")
       .addText((text) =>
         text
-          .setPlaceholder("Example: http://localhost:8080")
+          .setPlaceholder("http://localhost:8080")
           .setValue(this.plugin.settings.calibreServerUrl)
           .onChange((value) => {
             this.plugin.settings.calibreServerUrl = value;
@@ -304,11 +332,11 @@ export class BookSearchSettingTab extends PluginSettingTab {
     calibreLibraryIdSetting = new Setting(containerEl)
       .setName("Calibre library ID")
       .setDesc(
-        "The library ID (default: calibre). This is usually the folder name of your library.",
+        "Enter the library ID (default: calibre). This is usually the folder name of your library.",
       )
       .addText((text) =>
         text
-          .setPlaceholder("Calibre")
+          .setPlaceholder("calibre")
           .setValue(this.plugin.settings.calibreLibraryId)
           .onChange((value) => {
             this.plugin.settings.calibreLibraryId = value;
@@ -429,7 +457,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Google API settings description")
       .setDesc(
-        "**Warning** Please use this field only if you understand the Google Cloud API and API key security",
+        "**Warning** please use this field after you must understand Google Cloud API, such as API key security.",
       );
 
     new Setting(containerEl)

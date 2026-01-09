@@ -32,5 +32,6 @@ export interface Book {
   translator?: string; // 번역가
   narrator?: string; // 낭독자
   asin?: string;
+  tags?: string[];
   ids?: string;
 }

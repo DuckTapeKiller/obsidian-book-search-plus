@@ -51,8 +51,34 @@ export function applyDefaultFrontMatter(
       : frontmatter;
   for (const key in extraFrontMatter) {
     const value = extraFrontMatter[key]?.toString().trim() ?? "";
+
+    // logic to prevent overwriting existing data with empty strings from default template
+    if (value === "") {
+      if (
+        frontMater[key] !== undefined &&
+        frontMater[key] !== null &&
+        frontMater[key] !== ""
+      ) {
+        // keep existing value
+        continue;
+      }
+    }
+
     if (frontMater[key] && frontMater[key] !== value) {
-      frontMater[key] = `${frontMater[key]}, ${value}`;
+      if (Array.isArray(frontMater[key])) {
+        // if array, and we have a new value, we might want to append or ignore.
+        // But since value is string, we typically don't merge string into array unless specific logic.
+        // For now, if user provides string for array field, we ignore if empty, or replace if not empty (risky but standard behavior)
+        // But we already continued if value is empty.
+        if (value) {
+          // Trying to append string to array? Or replace?
+          // Standard behavior was appending string with comma.
+          // Let's stick to avoiding mangling if value is present.
+          frontMater[key] = `${frontMater[key]}, ${value}`;
+        }
+      } else {
+        frontMater[key] = `${frontMater[key]}, ${value}`;
+      }
     } else {
       frontMater[key] = value;
     }
@@ -70,7 +96,20 @@ export function replaceVariableSyntax(book: Book, text: string): string {
 
   return entries
     .reduce((result, [key, val = ""]) => {
-      return result.replace(new RegExp(`{{${key}}}`, "ig"), val);
+      if (Array.isArray(val)) {
+        const listString = val.map((v) => `\n  - ${v}`).join("");
+        // Check if the variable is wrapped in quotes in the template: "{{key}}"
+        const quotedRegex = new RegExp(`['"]{{${key}}}['"]`, "ig");
+        if (quotedRegex.test(result)) {
+          // Replace the entire quoted string with the list string (unquoted)
+          // We need to return result with the REPLACED content.
+          // BUT we are doing this in a reduce, so we must operate on 'result'.
+          return result.replace(quotedRegex, listString);
+        }
+
+        return result.replace(new RegExp(`{{${key}}}`, "ig"), listString);
+      }
+      return result.replace(new RegExp(`{{${key}}}`, "ig"), val as string);
     }, text)
     .replace(/{{\w+}}/gi, "")
     .trim();
@@ -102,15 +141,21 @@ export function parseFrontMatter(frontMatterString: string) {
 
 export function toStringFrontMatter(frontMatter: object): string {
   return Object.entries(frontMatter)
-    .map(([key, value]) => {
-      const newValue = value?.toString().trim() ?? "";
-      if (/\r|\n/.test(newValue)) {
+    .map(([key, newValue]) => {
+      if (Array.isArray(newValue)) {
+        if (newValue.length === 0) return "";
+        const listValues = newValue.map((v) => `  - ${v}`).join("\n");
+        return `${key}:\n${listValues}\n`;
+      }
+
+      const stringValue = newValue?.toString().trim() ?? "";
+      if (/\r|\n/.test(stringValue)) {
         return "";
       }
-      if (/:\s/.test(newValue)) {
-        return `${key}: "${newValue.replace(/"/g, "&quot;")}"\n`;
+      if (/:\s/.test(stringValue)) {
+        return `${key}: "${stringValue.replace(/"/g, "&quot;")}"\n`;
       }
-      return `${key}: ${newValue}\n`;
+      return `${key}: ${stringValue}\n`;
     })
     .join("")
     .trim();
@@ -172,4 +217,22 @@ function replacer(str: string, reg: RegExp, replaceValue) {
   return str.replace(reg, function () {
     return replaceValue;
   });
+}
+
+export function createBookTags(book: Book): string[] {
+  const sanitize = (str: string) => {
+    return str
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
+  };
+
+  const tags = [];
+  if (book.author) {
+    tags.push(sanitize(book.author));
+  }
+  if (book.title) {
+    tags.push(sanitize(book.title));
+  }
+  return tags;
 }
