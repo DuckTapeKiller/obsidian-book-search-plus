@@ -161,17 +161,17 @@ export class BookSearchSettingTab extends PluginSettingTab {
     this.createTemplateFileSetting(containerEl);
 
     // Service Provider
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let serviceProviderExtraSettingButton: HTMLElement;
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let preferredLocaleDropdownSetting: Setting;
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let coverImageEdgeCurlToggleSetting: Setting;
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let calibreServerUrlSetting: Setting;
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let calibreLibraryIdSetting: Setting;
-    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line prefer-const -- Delayed initialization
     let calibreSettingsHeader: Setting;
 
     const hideServiceProviderExtraSettingButton = () => {
