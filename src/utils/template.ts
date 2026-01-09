@@ -79,7 +79,7 @@ export function getFunctionConstructor(): typeof Function {
 }
 
 export async function useTemplaterPluginInFile(app: App, file: TFile) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing internal Obsidian API for Templater plugin
   const templater = (app as any).plugins.plugins['templater-obsidian'];
   if (templater && !templater?.settings['trigger_on_file_creation']) {
     await templater.templater.overwrite_file_commands(file);
