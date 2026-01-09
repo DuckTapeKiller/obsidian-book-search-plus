@@ -99,8 +99,7 @@ export class GoodreadsApi implements BaseBooksApiImpl {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Cheerio types are loosely defined and difficult to strictly type here
-  private extractBook($: any, link: string): Book {
+  private extractBook($: ReturnType<typeof cheerio.load>, link: string): Book {
     // 1. Título
     const title =
       $('h1[data-testid="bookTitle"]').first().text().trim() || $('#bookTitle').text().trim().replace(/"/g, "'");
