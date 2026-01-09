@@ -10,6 +10,8 @@
 * **Calibre Integration**: Connect to your local Calibre library to import metadata and covers.
 * **Language Improvements**: With the original plugin, regardless of the language selected for Google, results are based on the language used in the title. This is problematic when searching for books with universal titles such as “JavaScript” or “Python”. This version forces Google to provide results specifically in your selected language.
 
+**About book covers: by default, when you chose to download book covers locally, the files will be named "Title - Author.jpg".**
+
 ## Calibre Setup
 
 To import data from your local Calibre library, you must enable the Calibre Content Server to allow Obsidian to communicate with it.
