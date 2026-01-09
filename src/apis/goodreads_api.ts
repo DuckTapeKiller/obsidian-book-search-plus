@@ -99,7 +99,7 @@ export class GoodreadsApi implements BaseBooksApiImpl {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Cheerio types are loosely defined and difficult to strictly type here
   private extractBook($: any, link: string): Book {
     // 1. Título
     const title =
