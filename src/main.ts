@@ -33,37 +33,41 @@ import {
 export default class BookSearchPlugin extends Plugin {
   settings: BookSearchPluginSettings;
 
-  async onload() {
-    await this.loadSettings();
+  onload() {
+    this.loadSettings().then(() => {
+      // This creates an icon in the left ribbon.
+      const ribbonIconEl = this.addRibbonIcon(
+        "book",
+        "Create new book note",
+        (evt) => this.selectServiceAndSearch(evt),
+      );
+      // Perform additional things with the ribbon
+      ribbonIconEl.addClass("obsidian-book-search-plugin-ribbon-class");
 
-    // This creates an icon in the left ribbon.
-    const ribbonIconEl = this.addRibbonIcon(
-      "book",
-      "Create new book note",
-      (evt) => this.selectServiceAndSearch(evt),
-    );
-    // Perform additional things with the ribbon
-    ribbonIconEl.addClass("obsidian-book-search-plugin-ribbon-class");
+      // This adds a simple command that can be triggered anywhere
+      this.addCommand({
+        id: "open-book-search-modal",
+        name: "Create new book note",
+        callback: () => {
+          this.createNewBookNote().catch((err) => console.warn(err));
+        },
+      });
 
-    // This adds a simple command that can be triggered anywhere
-    this.addCommand({
-      id: "open-book-search-modal",
-      name: "Create new book note",
-      callback: () => this.createNewBookNote(),
+      this.addCommand({
+        id: "open-book-search-modal-to-insert",
+        name: "Insert the metadata",
+        callback: () => {
+          this.insertMetadata().catch((err) => console.warn(err));
+        },
+      });
+
+      // This adds a settings tab so the user can configure various aspects of the plugin
+      this.addSettingTab(new BookSearchSettingTab(this.app, this));
+
+      console.debug(
+        `Book Search: version ${this.manifest.version} (requires obsidian ${this.manifest.minAppVersion})`,
+      );
     });
-
-    this.addCommand({
-      id: "open-book-search-modal-to-insert",
-      name: "Insert the metadata",
-      callback: () => this.insertMetadata(),
-    });
-
-    // This adds a settings tab so the user can configure various aspects of the plugin
-    this.addSettingTab(new BookSearchSettingTab(this.app, this));
-
-    console.info(
-      `Book Search: version ${this.manifest.version} (requires obsidian ${this.manifest.minAppVersion})`,
-    );
   }
 
   showNotice(message: unknown) {
@@ -306,7 +310,9 @@ export default class BookSearchPlugin extends Plugin {
           .setTitle(service.label)
           .setIcon("search")
           .onClick(() => {
-            this.createNewBookNote(service.value);
+            this.createNewBookNote(service.value).catch((err) =>
+              console.warn(err),
+            );
           }),
       );
     });

@@ -5,8 +5,7 @@ export abstract class TextInputSuggest<T> extends AbstractInputSuggest<T> {
     app: App,
     protected inputEl: HTMLInputElement | HTMLTextAreaElement,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super(app, inputEl as any);
+    super(app, inputEl as HTMLInputElement);
   }
 
   abstract getSuggestions(inputStr: string): T[];

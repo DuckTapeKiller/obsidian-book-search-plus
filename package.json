@@ -32,8 +32,8 @@
     "test": "jest",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
-    "lint": "pnpm format:check && eslint . --ext .ts && tsc --noEmit -skipLibCheck",
-    "lint:fix": "pnpm format && eslint . --ext .ts --fix",
+    "lint": "pnpm format:check && eslint . && tsc --noEmit -skipLibCheck",
+    "lint:fix": "pnpm format && eslint . --fix",
     "build": "pnpm run lint && node esbuild.config.mjs production",
     "release": "standard-version",
     "release-test": "standard-version --dry-run",
@@ -45,15 +45,18 @@
     "deploy:pages": "gh-pages -d pages"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@popperjs/core": "^2.11.8",
+    "@types/cheerio": "^0.22.35",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.7",
-    "@typescript-eslint/eslint-plugin": "^7.8.0",
-    "@typescript-eslint/parser": "^7.8.0",
     "builtin-modules": "^4.0.0",
+    "cheerio": "^1.0.0-rc.12",
     "esbuild": "0.20.2",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-obsidianmd": "link:../eslint-plugin-obsidian",
     "gh-pages": "^4.0.0",
+    "globals": "^17.0.0",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -64,7 +67,6 @@
     "ts-node": "^10.9.2",
     "tslib": "2.6.2",
     "typescript": "5.1.6",
-    "cheerio": "^1.0.0-rc.12",
-    "@types/cheerio": "^0.22.35"
+    "typescript-eslint": "^8.52.0"
   }
 }

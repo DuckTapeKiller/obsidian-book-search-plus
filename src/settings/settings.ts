@@ -90,7 +90,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.folder)
           .onChange((new_folder) => {
             this.plugin.settings.folder = new_folder;
-            this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           });
       });
   }
@@ -115,7 +115,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.fileNameFormat)
           .onChange((newValue) => {
             this.plugin.settings.fileNameFormat = newValue?.trim();
-            this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
 
             newFileNameHint.textContent =
               replaceDateInString(newValue) || "{{title}} - {{author}}";
@@ -153,7 +153,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.templateFile)
           .onChange((newTemplateFile) => {
             this.plugin.settings.templateFile = newTemplateFile;
-            this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           });
       });
   }
@@ -167,18 +167,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     this.createTemplateFileSetting(containerEl);
 
     // Service Provider
-    // eslint-disable-next-line prefer-const -- Delayed initialization
     let serviceProviderExtraSettingButton: HTMLElement;
-    // eslint-disable-next-line prefer-const -- Delayed initialization
-    let preferredLocaleDropdownSetting: Setting;
-    // eslint-disable-next-line prefer-const -- Delayed initialization
-    let coverImageEdgeCurlToggleSetting: Setting;
-    // eslint-disable-next-line prefer-const -- Delayed initialization
-    let calibreServerUrlSetting: Setting;
-    // eslint-disable-next-line prefer-const -- Delayed initialization
-    let calibreLibraryIdSetting: Setting;
-    // eslint-disable-next-line prefer-const -- Delayed initialization
-    let calibreSettingsHeader: Setting;
 
     const hideServiceProviderExtraSettingButton = () => {
       if (serviceProviderExtraSettingButton)
@@ -278,11 +267,11 @@ export class BookSearchSettingTab extends PluginSettingTab {
         dropDown.setValue(
           this.plugin.settings?.serviceProvider ?? ServiceProvider.google,
         );
-        dropDown.onChange(async (value) => {
+        dropDown.onChange((value) => {
           const newValue = value as ServiceProvider;
           toggleServiceProviderExtraSettings(newValue);
           this.plugin.settings["serviceProvider"] = newValue;
-          await this.plugin.saveSettings();
+          this.plugin.saveSettings().catch((err) => console.warn(err));
         });
       })
       .addExtraButton((component) => {
@@ -292,22 +281,25 @@ export class BookSearchSettingTab extends PluginSettingTab {
         });
       });
 
-    calibreSettingsHeader = this.createHeader("Calibre Settings", containerEl);
+    const calibreSettingsHeader = this.createHeader(
+      "Calibre Settings",
+      containerEl,
+    );
 
-    calibreServerUrlSetting = new Setting(containerEl)
+    const calibreServerUrlSetting = new Setting(containerEl)
       .setName("Calibre Server URL")
       .setDesc("Enter the URL of your Calibre Content Server.")
       .addText((text) =>
         text
           .setPlaceholder("http://localhost:8080")
           .setValue(this.plugin.settings.calibreServerUrl)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.calibreServerUrl = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
-    calibreLibraryIdSetting = new Setting(containerEl)
+    const calibreLibraryIdSetting = new Setting(containerEl)
       .setName("Calibre Library ID")
       .setDesc(
         "Enter the Library ID (default: calibre). This is usually the folder name of your library.",
@@ -316,13 +308,13 @@ export class BookSearchSettingTab extends PluginSettingTab {
         text
           .setPlaceholder("calibre")
           .setValue(this.plugin.settings.calibreLibraryId)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.calibreLibraryId = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
-    preferredLocaleDropdownSetting = new Setting(containerEl)
+    const preferredLocaleDropdownSetting = new Setting(containerEl)
       .setName("Preferred locale")
       .setDesc("Sets the preferred locale to use when searching for books.")
       .addDropdown((dropDown) => {
@@ -343,10 +335,10 @@ export class BookSearchSettingTab extends PluginSettingTab {
               ? defaultLocale
               : localeValue,
           )
-          .onChange(async (value) => {
+          .onChange((value) => {
             const newValue = value;
             this.plugin.settings.localePreference = newValue;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           });
       });
 
@@ -358,9 +350,9 @@ export class BookSearchSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.openPageOnCompletion)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.openPageOnCompletion = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
@@ -370,9 +362,9 @@ export class BookSearchSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.showCoverImageInSearch)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.showCoverImageInSearch = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
@@ -383,23 +375,21 @@ export class BookSearchSettingTab extends PluginSettingTab {
         "Toggle to enable or disable asking for the locale every time a search is made.",
       )
       .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.askForLocale)
-          .onChange(async (value) => {
-            this.plugin.settings.askForLocale = value;
-            await this.plugin.saveSettings();
-          }),
+        toggle.setValue(this.plugin.settings.askForLocale).onChange((value) => {
+          this.plugin.settings.askForLocale = value;
+          this.plugin.saveSettings().catch((err) => console.warn(err));
+        }),
       );
 
-    coverImageEdgeCurlToggleSetting = new Setting(containerEl)
+    const coverImageEdgeCurlToggleSetting = new Setting(containerEl)
       .setName("Enable Cover Image Edge Curl Effect")
       .setDesc("Toggle to show or hide page curl effect in cover images.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.enableCoverImageEdgeCurl)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.enableCoverImageEdgeCurl = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
@@ -409,9 +399,9 @@ export class BookSearchSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.enableCoverImageSave)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.enableCoverImageSave = value;
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           }),
       );
 
@@ -426,9 +416,9 @@ export class BookSearchSettingTab extends PluginSettingTab {
         }
         cb.setPlaceholder("Enter the path (e.g., Images/Covers)")
           .setValue(this.plugin.settings.coverImagePath)
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settings.coverImagePath = value.trim();
-            await this.plugin.saveSettings();
+            this.plugin.saveSettings().catch((err) => console.warn(err));
           });
       });
 

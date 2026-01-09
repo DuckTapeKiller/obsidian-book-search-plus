@@ -78,7 +78,6 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
 
 export function getFunctionConstructor(): typeof Function {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
     return new Function("return (function(){}).constructor")();
   } catch (err) {
     console.warn(err);
@@ -91,7 +90,6 @@ export function getFunctionConstructor(): typeof Function {
 }
 
 export async function useTemplaterPluginInFile(app: App, file: TFile) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const templater = app.plugins.plugins["templater-obsidian"];
   if (templater && !templater?.settings["trigger_on_file_creation"]) {
