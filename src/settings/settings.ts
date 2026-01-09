@@ -137,7 +137,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
       text: "Files will be available as templates.",
     });
     templateFileDesc.createEl("a", {
-      text: "Example Template",
+      text: "Example template",
       href: `${docUrl}#example-template`,
     });
     new Setting(containerEl)
@@ -167,67 +167,65 @@ export class BookSearchSettingTab extends PluginSettingTab {
     this.createTemplateFileSetting(containerEl);
 
     // Service Provider
-    let serviceProviderExtraSettingButton: HTMLElement;
-    /* eslint-disable prefer-const */
-    let preferredLocaleDropdownSetting: Setting;
-    let coverImageEdgeCurlToggleSetting: Setting;
-    let calibreServerUrlSetting: Setting;
-    let calibreLibraryIdSetting: Setting;
-    let calibreSettingsHeader: Setting;
-    /* eslint-enable prefer-const */
+    let serviceProviderExtraSettingButton: HTMLElement | null = null;
+    let preferredLocaleDropdownSetting: Setting | null = null;
+    let coverImageEdgeCurlToggleSetting: Setting | null = null;
+    let calibreServerUrlSetting: Setting | null = null;
+    let calibreLibraryIdSetting: Setting | null = null;
+    let calibreSettingsHeader: Setting | null = null;
 
     const hideServiceProviderExtraSettingButton = () => {
-      if (serviceProviderExtraSettingButton)
+      if (serviceProviderExtraSettingButton !== null)
         serviceProviderExtraSettingButton.addClass("book-search-plugin__hide");
     };
     const showServiceProviderExtraSettingButton = () => {
-      if (serviceProviderExtraSettingButton)
+      if (serviceProviderExtraSettingButton !== null)
         serviceProviderExtraSettingButton.removeClass(
           "book-search-plugin__hide",
         );
     };
     const hideServiceProviderExtraSettingDropdown = () => {
-      if (preferredLocaleDropdownSetting)
+      if (preferredLocaleDropdownSetting !== null)
         preferredLocaleDropdownSetting.settingEl.addClass(
           "book-search-plugin__hide",
         );
     };
     const showServiceProviderExtraSettingDropdown = () => {
-      if (preferredLocaleDropdownSetting)
+      if (preferredLocaleDropdownSetting !== null)
         preferredLocaleDropdownSetting.settingEl.removeClass(
           "book-search-plugin__hide",
         );
     };
     const hideCoverImageEdgeCurlToggle = () => {
-      if (coverImageEdgeCurlToggleSetting)
+      if (coverImageEdgeCurlToggleSetting !== null)
         coverImageEdgeCurlToggleSetting.settingEl.addClass(
           "book-search-plugin__hide",
         );
     };
     const showCoverImageEdgeCurlToggle = () => {
-      if (coverImageEdgeCurlToggleSetting)
+      if (coverImageEdgeCurlToggleSetting !== null)
         coverImageEdgeCurlToggleSetting.settingEl.removeClass(
           "book-search-plugin__hide",
         );
     };
     const showCalibreSettings = () => {
-      if (calibreServerUrlSetting)
+      if (calibreServerUrlSetting !== null)
         calibreServerUrlSetting.settingEl.removeClass(
           "book-search-plugin__hide",
         );
-      if (calibreLibraryIdSetting)
+      if (calibreLibraryIdSetting !== null)
         calibreLibraryIdSetting.settingEl.removeClass(
           "book-search-plugin__hide",
         );
-      if (calibreSettingsHeader)
+      if (calibreSettingsHeader !== null)
         calibreSettingsHeader.settingEl.removeClass("book-search-plugin__hide");
     };
     const hideCalibreSettings = () => {
-      if (calibreServerUrlSetting)
+      if (calibreServerUrlSetting !== null)
         calibreServerUrlSetting.settingEl.addClass("book-search-plugin__hide");
-      if (calibreLibraryIdSetting)
+      if (calibreLibraryIdSetting !== null)
         calibreLibraryIdSetting.settingEl.addClass("book-search-plugin__hide");
-      if (calibreSettingsHeader)
+      if (calibreSettingsHeader !== null)
         calibreSettingsHeader.settingEl.addClass("book-search-plugin__hide");
     };
 
@@ -442,7 +440,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
       .addButton((button) => {
         button.setButtonText("API check").onClick(() => {
           if (this.plugin.settings.apiKey.length) {
-            new Notice("API key exist.");
+            new Notice("API key exists.");
           } else {
             new Notice("API key does not exist.");
           }
