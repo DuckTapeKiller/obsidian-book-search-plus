@@ -15,7 +15,9 @@ export function factoryServiceProvider(
   settings: BookSearchPluginSettings,
   serviceProviderOverride?: string,
 ): BaseBooksApiImpl {
-  const service = serviceProviderOverride || settings.serviceProvider;
+  // Fix: Cast the resulting string to the ServiceProvider enum
+  const service = (serviceProviderOverride || settings.serviceProvider) as ServiceProvider;
+  
   switch (service) {
     case ServiceProvider.google:
       return new GoogleBooksApi(settings.localePreference, settings.enableCoverImageEdgeCurl, settings.apiKey);
