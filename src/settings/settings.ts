@@ -290,7 +290,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
 
     calibreServerUrlSetting = new Setting(containerEl)
       .setName("Calibre server URL")
-      .setDesc("The URL of your Calibre content server.")
+      .setDesc("The URL of your Calibre content server")
       .addText((text) =>
         text
           .setPlaceholder("http://localhost:8080")
