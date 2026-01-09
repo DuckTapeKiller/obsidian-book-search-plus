@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Allow any for API response interfaces */
 export interface GoogleBooksResponse {
   kind: string;
   totalItems: number;
