@@ -1,0 +1,10 @@
+{
+    "id": "book-search-plus",
+    "name": "Book Search Plus",
+    "version": "1.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "Search for books in Google Books, Goodreads, and local Calibre libraries to create notes.",
+    "author": "DuckTapeKiller",
+    "authorUrl": "https://github.com/DuckTapeKiller",
+    "isDesktopOnly": false
+}
