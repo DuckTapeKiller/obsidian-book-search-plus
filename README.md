@@ -31,7 +31,6 @@ You can customise the frontmatter to suit your workflow. Below is the recommende
 ```markdown
 ---
 title: "{{title}}"
-originalTitle:
 author: "{{author}}"
 translator:
 foreword:
