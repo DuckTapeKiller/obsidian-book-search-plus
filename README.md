@@ -26,47 +26,27 @@ To import data from your local Calibre library, you must enable the Calibre Cont
 
 You can customise the frontmatter to suit your workflow. Below is the recommended configuration, utilising Spanish metadata keys.
 
-> **Note:** The Templater code block included below the frontmatter is specifically required for **Google Books** imports. Both Goodreads and Calibre integrations generally function correctly without this additional logic.
+> **Suggested template:**
 
 ```markdown
 ---
 title: "{{title}}"
 author: "{{author}}"
-translator:
-foreword:
 description: "{{description}}"
-pages:
 publisher: "{{publisher}}"
-narrator:
 category: "{{category}}"
 isbn10: "{{isbn10}}"
 isbn13: "{{isbn13}}"
-asin:
 publishDate: "{{publishDate}}"
 readDate:
-cover: "{{coverUrl}}"
+cover: "{{localCoverImage}}"
 tags:
 highlights:
 read: false
 ---
-
-<%*
-/* 1. Renders the image in the note body using Obsidian embedding syntax */
-/* NOTE: This section is only required for Google Books imports */
-const cover = tp.frontmatter["cover"];
-if (cover && cover !== "undefined" && cover.trim() !== "") {
-    /* Since we removed brackets in frontmatter, we add them here */
-    tR += `![[${cover}|300]]`;
-}
-%>
-
-<%*
-/* 2. Renaming Logic */
-/* NOTE: This section is only required for Google Books imports */
-const title = tp.frontmatter["title"] || tp.frontmatter.title || "Untitled";
-await tp.file.rename(`${title}`);
-%>
 ```
+
+**READ THIS!:** Please note that this ReadMe file is focused on explaining Goodreads and Calibre. If you want to learn how to write templates for Google Books, which is a feature from the original creator of the plugin, you need to check [their own documentaion](https://github.com/anpigon/obsidian-book-search-plugin#example-template)
 
 ### Credits
 
