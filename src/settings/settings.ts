@@ -104,7 +104,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setClass("book-search-plugin__settings--new_file_name")
       .setName("New file name")
-      .setDesc("Enter the file name format.")
+      .setDesc("The file name format.")
       .addSearch((cb) => {
         try {
           new FileNameFormatSuggest(this.app, cb.inputEl);
@@ -290,7 +290,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
 
     calibreServerUrlSetting = new Setting(containerEl)
       .setName("Calibre server URL")
-      .setDesc("Enter the URL of your Calibre content server.")
+      .setDesc("The URL of your Calibre content server.")
       .addText((text) =>
         text
           .setPlaceholder("http://localhost:8080")
@@ -304,7 +304,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     calibreLibraryIdSetting = new Setting(containerEl)
       .setName("Calibre library ID")
       .setDesc(
-        "Enter the library ID (default: calibre). This is usually the folder name of your library.",
+        "The library ID (default: calibre). This is usually the folder name of your library.",
       )
       .addText((text) =>
         text
@@ -429,7 +429,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Google API settings description")
       .setDesc(
-        "**Warning** please use this field after you must understand Google Cloud API, such as API key security.",
+        "**Warning** Please use this field only if you understand the Google Cloud API and API key security.",
       );
 
     new Setting(containerEl)
