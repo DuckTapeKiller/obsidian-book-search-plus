@@ -81,7 +81,7 @@ export class BookSearchModal extends Modal {
       (el) => {
         new TextComponent(el)
           .setValue(this.query)
-          .setPlaceholder("Keyword or ISBN")
+          .setPlaceholder("Book title or ISBN")
           .onChange((value) => (this.query = value))
           .inputEl.addEventListener("keydown", (event) => {
             if (event.key === "Enter" && !event.isComposing) {
