@@ -85,7 +85,7 @@ export class BookSearchModal extends Modal {
           .onChange((value) => (this.query = value))
           .inputEl.addEventListener("keydown", (event) => {
             if (event.key === "Enter" && !event.isComposing) {
-              this.searchBook();
+              void this.searchBook();
             }
           });
       },
@@ -94,7 +94,7 @@ export class BookSearchModal extends Modal {
       this.okBtnRef = btn
         .setButtonText(this.SEARCH_BUTTON_TEXT)
         .setCta()
-        .onClick(() => this.searchBook());
+        .onClick(() => void this.searchBook());
     });
   }
 

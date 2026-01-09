@@ -62,7 +62,7 @@ export class SettingServiceProviderModal extends Modal {
         .setButtonText("Save")
         .setCta()
         .onClick(() => {
-          (async () => {
+          void (async () => {
             await this.plugin.saveSettings();
             this.close();
             this.callback?.();

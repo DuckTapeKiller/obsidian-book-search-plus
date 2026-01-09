@@ -34,7 +34,7 @@ export default class BookSearchPlugin extends Plugin {
   settings: BookSearchPluginSettings;
 
   onload() {
-    this.loadSettings().then(() => {
+    void this.loadSettings().then(() => {
       // This creates an icon in the left ribbon.
       const ribbonIconEl = this.addRibbonIcon(
         "book",
@@ -49,7 +49,7 @@ export default class BookSearchPlugin extends Plugin {
         id: "open-book-search-modal",
         name: "Create new book note",
         callback: () => {
-          this.createNewBookNote().catch((err) => console.warn(err));
+          void this.createNewBookNote().catch((err) => console.warn(err));
         },
       });
 
@@ -57,7 +57,7 @@ export default class BookSearchPlugin extends Plugin {
         id: "open-book-search-modal-to-insert",
         name: "Insert the metadata",
         callback: () => {
-          this.insertMetadata().catch((err) => console.warn(err));
+          void this.insertMetadata().catch((err) => console.warn(err));
         },
       });
 
@@ -75,9 +75,9 @@ export default class BookSearchPlugin extends Plugin {
       const notice =
         message instanceof Error
           ? message.message
-          : typeof message === "object"
-            ? JSON.stringify(message)
-            : String(message);
+          : typeof message === "string"
+            ? message
+            : JSON.stringify(message) || "Unknown error";
       new Notice(notice);
     } catch {
       // eslint-disable
@@ -310,7 +310,7 @@ export default class BookSearchPlugin extends Plugin {
           .setTitle(service.label)
           .setIcon("search")
           .onClick(() => {
-            this.createNewBookNote(service.value).catch((err) =>
+            void this.createNewBookNote(service.value).catch((err) =>
               console.warn(err),
             );
           }),

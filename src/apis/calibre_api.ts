@@ -127,7 +127,7 @@ export class CalibreApi implements BaseBooksApiImpl {
         if (!isNaN(date.getTime())) {
           publishedYear = date.getFullYear().toString();
         }
-      } catch (e) {
+      } catch {
         console.warn("Failed to parse date", publishDate);
       }
     }

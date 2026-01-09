@@ -222,7 +222,7 @@ export class GoodreadsApi implements BaseBooksApiImpl {
           }
           if (!coverUrl && data.image) coverUrl = data.image;
         }
-      } catch (e) {
+      } catch {
         // ignore schema parse errors
       }
     });
