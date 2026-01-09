@@ -1,11 +1,11 @@
-import { Book } from '@models/book.model';
-import { BaseBooksApiImpl } from '@apis/base_api';
-import { requestUrl } from 'obsidian';
+import { Book } from "@models/book.model";
+import { BaseBooksApiImpl } from "@apis/base_api";
+import { requestUrl } from "obsidian";
 
 export class CalibreApi implements BaseBooksApiImpl {
   constructor(
     private readonly serverUrl: string,
-    private readonly libraryId: string = 'calibre',
+    private readonly libraryId: string = "calibre",
   ) {}
 
   async getByQuery(query: string): Promise<Book[]> {
@@ -16,9 +16,9 @@ export class CalibreApi implements BaseBooksApiImpl {
 
       const searchRes = await requestUrl({
         url: searchUrl,
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       });
 
@@ -33,11 +33,13 @@ export class CalibreApi implements BaseBooksApiImpl {
       // Limit results to avoid overwhelming requests
       const topBookIds = bookIds.slice(0, 5);
 
-      const books = await Promise.all(topBookIds.map(id => this.getBookDetails(id)));
+      const books = await Promise.all(
+        topBookIds.map((id) => this.getBookDetails(id)),
+      );
 
       return books;
     } catch (error) {
-      console.warn('Calibre search error', error);
+      console.warn("Calibre search error", error);
       throw error;
     }
   }
@@ -47,25 +49,25 @@ export class CalibreApi implements BaseBooksApiImpl {
     const bookUrl = `${this.serverUrl}/ajax/book/${id}`;
     const bookRes = await requestUrl({
       url: bookUrl,
-      method: 'GET',
+      method: "GET",
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
       },
     });
 
     const data = bookRes.json;
 
     // Remove trailing slash from serverUrl if present
-    const cleanServerUrl = this.serverUrl.replace(/\/$/, '');
-    const validLibraryId = this.libraryId || 'calibre';
+    const cleanServerUrl = this.serverUrl.replace(/\/$/, "");
+    const validLibraryId = this.libraryId || "calibre";
 
     // Try to find cover in data, or construct standard URL
     // Standard Content Server URL: /get/cover/{book_id}/{library_id}
     // If data.cover is present, it might be a relative path.
-    let coverUrl = '';
+    let coverUrl = "";
     if (data.cover) {
       coverUrl = data.cover;
-      if (coverUrl.startsWith('/')) {
+      if (coverUrl.startsWith("/")) {
         coverUrl = `${cleanServerUrl}${coverUrl}`;
       }
     } else {
@@ -78,9 +80,9 @@ export class CalibreApi implements BaseBooksApiImpl {
 
     const title = data.title;
     const authors = data.authors || [];
-    const author = authors.join(', ');
+    const author = authors.join(", ");
     // Clean HTML from comments/description
-    const rawDescription = data.comments || '';
+    const rawDescription = data.comments || "";
     // Simple regex to strip HTML tags if needed, though Obsidian renders HTML.
     // User requested sanitization for frontmatter earlier, so we might want to be careful.
     // But standard description scraping keeps HTML often.
@@ -88,7 +90,7 @@ export class CalibreApi implements BaseBooksApiImpl {
     // For consistency with other scrapers, we usually keep text.
     // Let's do a simple strip for safety or leave as is if user wants HTML.
     // Given previous request for sanitization, text-only is safer.
-    const description = rawDescription.replace(/<[^>]*>?/gm, '');
+    const description = rawDescription.replace(/<[^>]*>?/gm, "");
 
     // ISBN
     // Calibre uses 'identifiers' map. In some versions/responses it might be directly in data or inside identifiers object.
@@ -104,21 +106,21 @@ export class CalibreApi implements BaseBooksApiImpl {
     // Let's first parse the identifiers properly.
     // data.identifiers is often { isbn: "..." } or similar.
     const identifiers = data.identifiers || {};
-    let isbn = identifiers.isbn || data.isbn || '';
+    let isbn = identifiers.isbn || data.isbn || "";
 
     // If isbn has prefix like "isbn:", remove it. User wants ONLY the number.
-    if (isbn && typeof isbn === 'string') {
-      isbn = isbn.replace(/^isbn:/i, '');
+    if (isbn && typeof isbn === "string") {
+      isbn = isbn.replace(/^isbn:/i, "");
     }
 
     const ids = isbn; // User wants this specific field handling.
 
     // Publisher
-    const publisher = data.publisher || '';
-    const publishDate = data.pubdate || '';
+    const publisher = data.publisher || "";
+    const publishDate = data.pubdate || "";
 
     // Published Date - Year only
-    let publishedYear = '';
+    let publishedYear = "";
     if (publishDate) {
       try {
         const date = new Date(publishDate);
@@ -126,31 +128,31 @@ export class CalibreApi implements BaseBooksApiImpl {
           publishedYear = date.getFullYear().toString();
         }
       } catch (e) {
-        console.warn('Failed to parse date', publishDate);
+        console.warn("Failed to parse date", publishDate);
       }
     }
 
     return {
       title,
-      subtitle: '',
+      subtitle: "",
       author,
       authors,
-      category: '',
+      category: "",
       categories: data.tags || [],
       publisher,
       publishDate: publishedYear, // User wanted ONLY the year
-      totalPage: '',
+      totalPage: "",
       coverUrl,
       coverSmallUrl: coverUrl,
       description,
       link: bookUrl,
       previewLink: bookUrl,
-      isbn10: '',
+      isbn10: "",
       isbn13: isbn, // Keep standard fields too
       ids: ids, // New field
-      originalTitle: '',
-      translator: '',
-      narrator: '',
+      originalTitle: "",
+      translator: "",
+      narrator: "",
     };
   }
 }

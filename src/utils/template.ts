@@ -1,24 +1,35 @@
-import { Book } from '@models/book.model';
-import { App, normalizePath, Notice, TFile } from 'obsidian';
+import { Book } from "@models/book.model";
+import { App, normalizePath, Notice, TFile } from "obsidian";
 
-export async function getTemplateContents(app: App, templatePath: string | undefined): Promise<string> {
+export async function getTemplateContents(
+  app: App,
+  templatePath: string | undefined,
+): Promise<string> {
   const { metadataCache, vault } = app;
-  const normalizedTemplatePath = normalizePath(templatePath ?? '');
-  if (templatePath === '/') {
-    return Promise.resolve('');
+  const normalizedTemplatePath = normalizePath(templatePath ?? "");
+  if (templatePath === "/") {
+    return Promise.resolve("");
   }
 
   try {
-    const templateFile = metadataCache.getFirstLinkpathDest(normalizedTemplatePath, '');
-    return templateFile ? vault.cachedRead(templateFile) : '';
+    const templateFile = metadataCache.getFirstLinkpathDest(
+      normalizedTemplatePath,
+      "",
+    );
+    return templateFile ? vault.cachedRead(templateFile) : "";
   } catch (err) {
-    console.error(`Failed to read the daily note template '${normalizedTemplatePath}'`, err);
-    new Notice('Failed to read the daily note template');
-    return '';
+    console.error(
+      `Failed to read the daily note template '${normalizedTemplatePath}'`,
+      err,
+    );
+    new Notice("Failed to read the daily note template");
+    return "";
   }
 }
 
-export function applyTemplateTransformations(rawTemplateContents: string): string {
+export function applyTemplateTransformations(
+  rawTemplateContents: string,
+): string {
   return rawTemplateContents.replace(
     /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
     (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
@@ -27,9 +38,9 @@ export function applyTemplateTransformations(rawTemplateContents: string): strin
         .moment()
         .clone()
         .set({
-          hour: now.get('hour'),
-          minute: now.get('minute'),
-          second: now.get('second'),
+          hour: now.get("hour"),
+          minute: now.get("minute"),
+          second: now.get("second"),
         });
       if (calc) {
         currentDate.add(parseInt(timeDelta, 10), unit);
@@ -38,7 +49,7 @@ export function applyTemplateTransformations(rawTemplateContents: string): strin
       if (momentFormat) {
         return currentDate.format(momentFormat.substring(1).trim());
       }
-      return currentDate.format('YYYY-MM-DD');
+      return currentDate.format("YYYY-MM-DD");
     },
   );
 }
@@ -51,11 +62,11 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
     try {
       const outputs = new ctor(
         [
-          'const [book] = arguments',
+          "const [book] = arguments",
           `const output = ${script}`,
           'if(typeof output === "string") return output',
-          'return JSON.stringify(output)',
-        ].join(';'),
+          "return JSON.stringify(output)",
+        ].join(";"),
       )(book);
       return result.replace(matched, outputs);
     } catch (err) {
@@ -67,11 +78,12 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
 
 export function getFunctionConstructor(): typeof Function {
   try {
-    return new Function('return (function(){}).constructor')();
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+    return new Function("return (function(){}).constructor")();
   } catch (err) {
     console.warn(err);
     if (err instanceof SyntaxError) {
-      throw Error('Bad template syntax');
+      throw Error("Bad template syntax");
     } else {
       throw err;
     }
@@ -79,9 +91,10 @@ export function getFunctionConstructor(): typeof Function {
 }
 
 export async function useTemplaterPluginInFile(app: App, file: TFile) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing internal Obsidian API for Templater plugin
-  const templater = (app as any).plugins.plugins['templater-obsidian'];
-  if (templater && !templater?.settings['trigger_on_file_creation']) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const templater = app.plugins.plugins["templater-obsidian"];
+  if (templater && !templater?.settings["trigger_on_file_creation"]) {
     await templater.templater.overwrite_file_commands(file);
   }
 }

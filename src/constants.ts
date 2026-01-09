@@ -1,5 +1,5 @@
 export enum ServiceProvider {
-  google = 'google',
-  goodreads = 'goodreads',
-  calibre = 'calibre',
+  google = "google",
+  goodreads = "goodreads",
+  calibre = "calibre",
 }

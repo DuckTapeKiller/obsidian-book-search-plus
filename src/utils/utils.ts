@@ -1,5 +1,5 @@
-import { Book, FrontMatter } from '@models/book.model';
-import { DefaultFrontmatterKeyType } from '@settings/settings';
+import { Book, FrontMatter } from "@models/book.model";
+import { DefaultFrontmatterKeyType } from "@settings/settings";
 
 // == Format Syntax == //
 export const NUMBER_REGEX = /^-?[0-9]*$/;
@@ -7,14 +7,18 @@ export const DATE_REGEX = /{{DATE(\+-?[0-9]+)?}}/;
 export const DATE_REGEX_FORMATTED = /{{DATE:([^}\n\r+]*)(\+-?[0-9]+)?}}/;
 
 export function replaceIllegalFileNameCharactersInString(text: string) {
-  return text.replace(/[\\,#%&{}/*<>$":@.?|]/g, '').replace(/\s+/g, ' ');
+  return text.replace(/[\\,#%&{}/*<>$":@.?|]/g, "").replace(/\s+/g, " ");
 }
 
 export function isISBN(str: string) {
   return /^(97(8|9))?\d{9}(\d|X)$/.test(str);
 }
 
-export function makeFileName(book: Book, fileNameFormat?: string, extension = 'md') {
+export function makeFileName(
+  book: Book,
+  fileNameFormat?: string,
+  extension = "md",
+) {
   let result;
   if (fileNameFormat) {
     result = replaceVariableSyntax(book, replaceDateInString(fileNameFormat));
@@ -36,11 +40,17 @@ export function applyDefaultFrontMatter(
   frontmatter: FrontMatter | string,
   keyType: DefaultFrontmatterKeyType = DefaultFrontmatterKeyType.snakeCase,
 ) {
-  const frontMater = keyType === DefaultFrontmatterKeyType.camelCase ? book : changeSnakeCase(book);
+  const frontMater =
+    keyType === DefaultFrontmatterKeyType.camelCase
+      ? book
+      : changeSnakeCase(book);
 
-  const extraFrontMatter = typeof frontmatter === 'string' ? parseFrontMatter(frontmatter) : frontmatter;
+  const extraFrontMatter =
+    typeof frontmatter === "string"
+      ? parseFrontMatter(frontmatter)
+      : frontmatter;
   for (const key in extraFrontMatter) {
-    const value = extraFrontMatter[key]?.toString().trim() ?? '';
+    const value = extraFrontMatter[key]?.toString().trim() ?? "";
     if (frontMater[key] && frontMater[key] !== value) {
       frontMater[key] = `${frontMater[key]}, ${value}`;
     } else {
@@ -53,30 +63,30 @@ export function applyDefaultFrontMatter(
 
 export function replaceVariableSyntax(book: Book, text: string): string {
   if (!text?.trim()) {
-    return '';
+    return "";
   }
 
   const entries = Object.entries(book);
 
   return entries
-    .reduce((result, [key, val = '']) => {
-      return result.replace(new RegExp(`{{${key}}}`, 'ig'), val);
+    .reduce((result, [key, val = ""]) => {
+      return result.replace(new RegExp(`{{${key}}}`, "ig"), val);
     }, text)
-    .replace(/{{\w+}}/gi, '')
+    .replace(/{{\w+}}/gi, "")
     .trim();
 }
 
 export function camelToSnakeCase(str) {
-  return str.replace(/[A-Z]/g, letter => `_${letter?.toLowerCase()}`);
+  return str.replace(/[A-Z]/g, (letter) => `_${letter?.toLowerCase()}`);
 }
 
 export function parseFrontMatter(frontMatterString: string) {
   if (!frontMatterString) return {};
   return frontMatterString
-    .split('\n')
-    .map(item => {
-      const index = item.indexOf(':');
-      if (index === -1) return [item.trim(), ''];
+    .split("\n")
+    .map((item) => {
+      const index = item.indexOf(":");
+      if (index === -1) return [item.trim(), ""];
 
       const key = item.slice(0, index)?.trim();
       const value = item.slice(index + 1)?.trim();
@@ -84,7 +94,7 @@ export function parseFrontMatter(frontMatterString: string) {
     })
     .reduce((acc, [key, value]) => {
       if (key) {
-        acc[key] = value?.trim() ?? '';
+        acc[key] = value?.trim() ?? "";
       }
       return acc;
     }, {});
@@ -93,29 +103,33 @@ export function parseFrontMatter(frontMatterString: string) {
 export function toStringFrontMatter(frontMatter: object): string {
   return Object.entries(frontMatter)
     .map(([key, value]) => {
-      const newValue = value?.toString().trim() ?? '';
+      const newValue = value?.toString().trim() ?? "";
       if (/\r|\n/.test(newValue)) {
-        return '';
+        return "";
       }
       if (/:\s/.test(newValue)) {
-        return `${key}: "${newValue.replace(/"/g, '&quot;')}"\n`;
+        return `${key}: "${newValue.replace(/"/g, "&quot;")}"\n`;
       }
       return `${key}: ${newValue}\n`;
     })
-    .join('')
+    .join("")
     .trim();
 }
 
 export function getDate(input?: { format?: string; offset?: number }) {
   let duration;
 
-  if (input?.offset !== null && input?.offset !== undefined && typeof input.offset === 'number') {
-    duration = window.moment.duration(input.offset, 'days');
+  if (
+    input?.offset !== null &&
+    input?.offset !== undefined &&
+    typeof input.offset === "number"
+  ) {
+    duration = window.moment.duration(input.offset, "days");
   }
 
   return input?.format
     ? window.moment().add(duration).format(input?.format)
-    : window.moment().add(duration).format('YYYY-MM-DD');
+    : window.moment().add(duration).format("YYYY-MM-DD");
 }
 
 export function replaceDateInString(input: string) {
@@ -126,7 +140,7 @@ export function replaceDateInString(input: string) {
     let offset = 0;
 
     if (dateMatch?.[1]) {
-      const offsetString = dateMatch[1].replace('+', '').trim();
+      const offsetString = dateMatch[1].replace("+", "").trim();
       const offsetIsInt = NUMBER_REGEX.test(offsetString);
       if (offsetIsInt) offset = parseInt(offsetString);
     }
@@ -139,12 +153,16 @@ export function replaceDateInString(input: string) {
     let offset = 0;
 
     if (dateMatch?.[2]) {
-      const offsetString = dateMatch[2].replace('+', '').trim();
+      const offsetString = dateMatch[2].replace("+", "").trim();
       const offsetIsInt = NUMBER_REGEX.test(offsetString);
       if (offsetIsInt) offset = parseInt(offsetString);
     }
 
-    output = replacer(output, DATE_REGEX_FORMATTED, getDate({ format, offset }));
+    output = replacer(
+      output,
+      DATE_REGEX_FORMATTED,
+      getDate({ format, offset }),
+    );
   }
 
   return output;

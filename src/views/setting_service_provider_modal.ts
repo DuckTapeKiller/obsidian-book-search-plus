@@ -1,6 +1,6 @@
-import { ServiceProvider } from '@src/constants';
-import BookSearchPlugin from '@src/main';
-import { Modal, Setting } from 'obsidian';
+import { ServiceProvider } from "@src/constants";
+import BookSearchPlugin from "@src/main";
+import { Modal, Setting } from "obsidian";
 
 export class SettingServiceProviderModal extends Modal {
   private readonly plugin: BookSearchPlugin;
@@ -12,7 +12,8 @@ export class SettingServiceProviderModal extends Modal {
   ) {
     super(plugin.app);
     this.plugin = plugin;
-    this.currentServiceProvider = plugin.settings?.serviceProvider ?? ServiceProvider.google;
+    this.currentServiceProvider =
+      plugin.settings?.serviceProvider ?? ServiceProvider.google;
   }
 
   get settings() {
@@ -26,7 +27,7 @@ export class SettingServiceProviderModal extends Modal {
   saveCalibreServerUrl(url: string) {
     if (this.currentServiceProvider === ServiceProvider.calibre) {
       // Remove trailing slash if present
-      this.plugin.settings.calibreServerUrl = url.replace(/\/$/, '');
+      this.plugin.settings.calibreServerUrl = url.replace(/\/$/, "");
     }
   }
 
@@ -34,34 +35,38 @@ export class SettingServiceProviderModal extends Modal {
     if (this.currentServiceProvider === ServiceProvider.calibre) {
       return this.settings.calibreServerUrl;
     }
-    return '';
+    return "";
   }
 
   get currentClientSecret() {
-    return '';
+    return "";
   }
   onOpen() {
     const { contentEl } = this;
 
-    contentEl.createEl('h2', { text: 'Service Provider Setting' });
+    contentEl.createEl("h2", { text: "Service provider setting" });
 
     if (this.currentServiceProvider === ServiceProvider.calibre) {
       new Setting(contentEl)
-        .setName('Calibre Server URL')
-        .setDesc('e.g. http://192.168.1.50:8080')
-        .addText(text => {
-          text.setValue(this.currentCalibreServerUrl).onChange(value => this.saveCalibreServerUrl(value));
+        .setName("Calibre server URL")
+        .setDesc("e.g. http://192.168.1.50:8080")
+        .addText((text) => {
+          text
+            .setValue(this.currentCalibreServerUrl)
+            .onChange((value) => this.saveCalibreServerUrl(value));
         });
     }
 
-    new Setting(contentEl).addButton(btn =>
+    new Setting(contentEl).addButton((btn) =>
       btn
-        .setButtonText('Save')
+        .setButtonText("Save")
         .setCta()
-        .onClick(async () => {
-          await this.plugin.saveSettings();
-          this.close();
-          this.callback?.();
+        .onClick(() => {
+          (async () => {
+            await this.plugin.saveSettings();
+            this.close();
+            this.callback?.();
+          })();
         }),
     );
   }

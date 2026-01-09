@@ -105,9 +105,9 @@ export interface IndustryIdentifier {
 }
 
 export enum Type {
-  Isbn10 = 'ISBN_10',
-  Isbn13 = 'ISBN_13',
-  Other = 'OTHER',
+  Isbn10 = "ISBN_10",
+  Isbn13 = "ISBN_13",
+  Other = "OTHER",
 }
 
 export interface PanelizationSummary {

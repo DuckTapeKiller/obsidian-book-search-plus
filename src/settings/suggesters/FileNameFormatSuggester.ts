@@ -1,20 +1,21 @@
-import type { App } from 'obsidian';
-import { TextInputSuggest } from './suggest';
+import type { App } from "obsidian";
+import { TextInputSuggest } from "./suggest";
 
 // == Format Syntax Suggestion == //
-export const DATE_SYNTAX = '{{DATE}}';
-export const DATE_FORMAT_SYNTAX = '{{DATE:}}';
+export const DATE_SYNTAX = "{{DATE}}";
+export const DATE_FORMAT_SYNTAX = "{{DATE:}}";
 export const DATE_SYNTAX_SUGGEST_REGEX = /{{D?A?T?E?}?}?$/i;
-export const DATE_FORMAT_SYNTAX_SUGGEST_REGEX = /{{D?A?T?E?:?$|{{DATE:[^\n\r}]*}}$/i;
+export const DATE_FORMAT_SYNTAX_SUGGEST_REGEX =
+  /{{D?A?T?E?:?$|{{DATE:[^\n\r}]*}}$/i;
 
-export const AUTHOR_SYNTAX = '{{author}}';
+export const AUTHOR_SYNTAX = "{{author}}";
 export const AUTHOR_SYNTAX_SUGGEST_REGEX = /{{a?u?t?h?o?r?}?}?$/i;
 
-export const TITLE_SYNTAX = '{{title}}';
+export const TITLE_SYNTAX = "{{title}}";
 export const TITLE_SYNTAX_SUGGEST_REGEX = /{{t?i?t?l?e?}?}?$/i;
 
 export class FileNameFormatSuggest extends TextInputSuggest<string> {
-  private lastInput = '';
+  private lastInput = "";
 
   constructor(
     public app: App,
@@ -26,28 +27,34 @@ export class FileNameFormatSuggest extends TextInputSuggest<string> {
   getSuggestions(inputStr: string): string[] {
     const cursorPosition: number = this.inputEl.selectionStart;
     const lookbehind = 15;
-    const inputBeforeCursor = inputStr.substr(cursorPosition - lookbehind, lookbehind);
+    const inputBeforeCursor = inputStr.substring(
+      cursorPosition - lookbehind,
+      cursorPosition,
+    );
     const suggestions: string[] = [];
 
-    this.processToken(inputBeforeCursor, (match: RegExpMatchArray, suggestion: string) => {
-      this.lastInput = match[0];
-      suggestions.push(suggestion);
-    });
+    this.processToken(
+      inputBeforeCursor,
+      (match: RegExpMatchArray, suggestion: string) => {
+        this.lastInput = match[0];
+        suggestions.push(suggestion);
+      },
+    );
 
     return suggestions;
   }
 
-  selectSuggestion(item: string): void {
+  selectSuggestion(item: string, _evt: MouseEvent | KeyboardEvent): void {
     const cursorPosition: number = this.inputEl.selectionStart;
     const lastInputLength: number = this.lastInput.length;
     const currentInputValue: string = this.inputEl.value;
     let insertedEndPosition = 0;
 
     const insert = (text: string, offset = 0) => {
-      return `${currentInputValue.substr(
+      return `${currentInputValue.substring(
         0,
         cursorPosition - lastInputLength + offset,
-      )}${text}${currentInputValue.substr(cursorPosition)}`;
+      )}${text}${currentInputValue.substring(cursorPosition)}`;
     };
 
     this.processToken(item, (_match, suggestion) => {
@@ -61,7 +68,7 @@ export class FileNameFormatSuggest extends TextInputSuggest<string> {
       }
     });
 
-    this.inputEl.trigger('input');
+    this.inputEl.trigger("input");
     this.close();
     this.inputEl.setSelectionRange(insertedEndPosition, insertedEndPosition);
   }
@@ -70,7 +77,10 @@ export class FileNameFormatSuggest extends TextInputSuggest<string> {
     if (value) el.setText(value);
   }
 
-  private processToken(input: string, callback: (match: RegExpMatchArray, suggestion: string) => void) {
+  private processToken(
+    input: string,
+    callback: (match: RegExpMatchArray, suggestion: string) => void,
+  ) {
     const dateFormatMatch = DATE_FORMAT_SYNTAX_SUGGEST_REGEX.exec(input);
     if (dateFormatMatch) callback(dateFormatMatch, DATE_FORMAT_SYNTAX);
 

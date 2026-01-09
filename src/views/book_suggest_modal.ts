@@ -1,5 +1,5 @@
-import { App, SuggestModal } from 'obsidian';
-import { Book } from '@models/book.model';
+import { App, SuggestModal } from "obsidian";
+import { Book } from "@models/book.model";
 
 export class BookSuggestModal extends SuggestModal<Book> {
   showCoverImageInSearch: boolean;
@@ -16,7 +16,7 @@ export class BookSuggestModal extends SuggestModal<Book> {
 
   // Returns all available suggestions.
   getSuggestions(query: string): Book[] {
-    return this.suggestion.filter(book => {
+    return this.suggestion.filter((book) => {
       const searchQuery = query?.toLowerCase();
       return (
         book.title?.toLowerCase().includes(searchQuery) ||
@@ -28,13 +28,17 @@ export class BookSuggestModal extends SuggestModal<Book> {
 
   // Renders each suggestion item.
   renderSuggestion(book: Book, el: HTMLElement) {
-    el.addClass('book-suggestion-item');
+    el.addClass("book-suggestion-item");
 
-    const coverImageUrl = book.coverLargeUrl || book.coverMediumUrl || book.coverSmallUrl || book.coverUrl;
+    const coverImageUrl =
+      book.coverLargeUrl ||
+      book.coverMediumUrl ||
+      book.coverSmallUrl ||
+      book.coverUrl;
 
     if (this.showCoverImageInSearch && coverImageUrl) {
-      el.createEl('img', {
-        cls: 'book-cover-image',
+      el.createEl("img", {
+        cls: "book-cover-image",
         attr: {
           src: coverImageUrl,
           alt: `Cover Image for ${book.title}`,
@@ -42,14 +46,14 @@ export class BookSuggestModal extends SuggestModal<Book> {
       });
     }
 
-    const textContainer = el.createEl('div', { cls: 'book-text-info' });
-    textContainer.createEl('div', { text: book.title });
+    const textContainer = el.createEl("div", { cls: "book-text-info" });
+    textContainer.createEl("div", { text: book.title });
 
-    const publisher = book.publisher ? `, ${book.publisher}` : '';
-    const publishDate = book.publishDate ? `(${book.publishDate})` : '';
-    const totalPage = book.totalPage ? `, p${book.totalPage}` : '';
+    const publisher = book.publisher ? `, ${book.publisher}` : "";
+    const publishDate = book.publishDate ? `(${book.publishDate})` : "";
+    const totalPage = book.totalPage ? `, p${book.totalPage}` : "";
     const subtitle = `${book.author}${publisher}${publishDate}${totalPage}`;
-    textContainer.createEl('small', { text: subtitle });
+    textContainer.createEl("small", { text: subtitle });
   }
 
   // Perform action on the selected suggestion.

@@ -1,18 +1,34 @@
-import { MarkdownView, Notice, Plugin, TFile, requestUrl, Menu } from 'obsidian';
-import { factoryServiceProvider } from '@apis/base_api';
+import {
+  MarkdownView,
+  Notice,
+  Plugin,
+  TFile,
+  requestUrl,
+  Menu,
+} from "obsidian";
+import { factoryServiceProvider } from "@apis/base_api";
 
-import { BookSearchModal } from '@views/book_search_modal';
-import { BookSuggestModal } from '@views/book_suggest_modal';
-import { CursorJumper } from '@utils/cursor_jumper';
-import { Book } from '@models/book.model';
-import { BookSearchSettingTab, BookSearchPluginSettings, DEFAULT_SETTINGS } from '@settings/settings';
+import { BookSearchModal } from "@views/book_search_modal";
+import { BookSuggestModal } from "@views/book_suggest_modal";
+import { CursorJumper } from "@utils/cursor_jumper";
+import { Book } from "@models/book.model";
+import {
+  BookSearchSettingTab,
+  BookSearchPluginSettings,
+  DEFAULT_SETTINGS,
+} from "@settings/settings";
 import {
   getTemplateContents,
   applyTemplateTransformations,
   useTemplaterPluginInFile,
   executeInlineScriptsTemplates,
-} from '@utils/template';
-import { replaceVariableSyntax, makeFileName, applyDefaultFrontMatter, toStringFrontMatter } from '@utils/utils';
+} from "@utils/template";
+import {
+  replaceVariableSyntax,
+  makeFileName,
+  applyDefaultFrontMatter,
+  toStringFrontMatter,
+} from "@utils/utils";
 
 export default class BookSearchPlugin extends Plugin {
   settings: BookSearchPluginSettings;
@@ -21,32 +37,44 @@ export default class BookSearchPlugin extends Plugin {
     await this.loadSettings();
 
     // This creates an icon in the left ribbon.
-    const ribbonIconEl = this.addRibbonIcon('book', 'Create new book note', () => this.selectServiceAndSearch());
+    const ribbonIconEl = this.addRibbonIcon(
+      "book",
+      "Create new book note",
+      (evt) => this.selectServiceAndSearch(evt),
+    );
     // Perform additional things with the ribbon
-    ribbonIconEl.addClass('obsidian-book-search-plugin-ribbon-class');
+    ribbonIconEl.addClass("obsidian-book-search-plugin-ribbon-class");
 
     // This adds a simple command that can be triggered anywhere
     this.addCommand({
-      id: 'open-book-search-modal',
-      name: 'Create new book note',
+      id: "open-book-search-modal",
+      name: "Create new book note",
       callback: () => this.createNewBookNote(),
     });
 
     this.addCommand({
-      id: 'open-book-search-modal-to-insert',
-      name: 'Insert the metadata',
+      id: "open-book-search-modal-to-insert",
+      name: "Insert the metadata",
       callback: () => this.insertMetadata(),
     });
 
     // This adds a settings tab so the user can configure various aspects of the plugin
     this.addSettingTab(new BookSearchSettingTab(this.app, this));
 
-    console.log(`Book Search: version ${this.manifest.version} (requires obsidian ${this.manifest.minAppVersion})`);
+    console.info(
+      `Book Search: version ${this.manifest.version} (requires obsidian ${this.manifest.minAppVersion})`,
+    );
   }
 
   showNotice(message: unknown) {
     try {
-      new Notice(message?.toString());
+      const notice =
+        message instanceof Error
+          ? message.message
+          : typeof message === "object"
+            ? JSON.stringify(message)
+            : String(message);
+      new Notice(notice);
     } catch {
       // eslint-disable
     }
@@ -57,7 +85,10 @@ export default class BookSearchPlugin extends Plugin {
     const searchedBooks = await this.openBookSearchModal(query);
     const book = await this.openBookSuggestModal(searchedBooks);
     // Enrich book with full details if provider supports it
-    const api = factoryServiceProvider(this.settings, this.serviceProviderOverride);
+    const api = factoryServiceProvider(
+      this.settings,
+      this.serviceProviderOverride,
+    );
 
     if (api.getBook) {
       return await api.getBook(book);
@@ -76,26 +107,50 @@ export default class BookSearchPlugin extends Plugin {
       content, // @deprecated
     } = this.settings;
 
-    let contentBody = '';
+    let contentBody = "";
 
     if (enableCoverImageSave) {
-      const coverImageUrl = book.coverLargeUrl || book.coverMediumUrl || book.coverSmallUrl || book.coverUrl;
+      const coverImageUrl =
+        book.coverLargeUrl ||
+        book.coverMediumUrl ||
+        book.coverSmallUrl ||
+        book.coverUrl;
       if (coverImageUrl) {
         // Enforce "Title - Author.jpg" format for cover images as requested
-        const imageName = `${book.title} - ${book.author}.jpg`.replace(/[:/\\?%*|"<>]/g, '');
-        book.localCoverImage = await this.downloadAndSaveImage(imageName, coverImagePath, coverImageUrl);
+        const imageName = `${book.title} - ${book.author}.jpg`.replace(
+          /[:/\\?%*|"<>]/g,
+          "",
+        );
+        book.localCoverImage = await this.downloadAndSaveImage(
+          imageName,
+          coverImagePath,
+          coverImageUrl,
+        );
       }
     }
 
     if (templateFile) {
-      const templateContents = await getTemplateContents(this.app, templateFile);
-      const replacedVariable = replaceVariableSyntax(book, applyTemplateTransformations(templateContents));
+      const templateContents = await getTemplateContents(
+        this.app,
+        templateFile,
+      );
+      const replacedVariable = replaceVariableSyntax(
+        book,
+        applyTemplateTransformations(templateContents),
+      );
       contentBody += executeInlineScriptsTemplates(book, replacedVariable);
     } else {
-      let replacedVariableFrontmatter = replaceVariableSyntax(book, frontmatter); // @deprecated
+      let replacedVariableFrontmatter = replaceVariableSyntax(
+        book,
+        frontmatter,
+      ); // @deprecated
       if (useDefaultFrontmatter) {
         replacedVariableFrontmatter = toStringFrontMatter(
-          applyDefaultFrontMatter(book, replacedVariableFrontmatter, defaultFrontmatterKeyType),
+          applyDefaultFrontMatter(
+            book,
+            replacedVariableFrontmatter,
+            defaultFrontmatterKeyType,
+          ),
         );
       }
       const replacedVariableContent = replaceVariableSyntax(book, content);
@@ -107,20 +162,24 @@ export default class BookSearchPlugin extends Plugin {
     return contentBody;
   }
 
-  async downloadAndSaveImage(imageName: string, directory: string, imageUrl: string): Promise<string> {
+  async downloadAndSaveImage(
+    imageName: string,
+    directory: string,
+    imageUrl: string,
+  ): Promise<string> {
     const { enableCoverImageSave } = this.settings;
     if (!enableCoverImageSave) {
-      console.warn('Cover image saving is not enabled.');
-      return '';
+      console.warn("Cover image saving is not enabled.");
+      return "";
     }
 
     try {
       // Use Obsidian's requestUrl method to fetch the image data:
       const response = await requestUrl({
         url: imageUrl,
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'image/*',
+          Accept: "image/*",
         },
       });
 
@@ -133,8 +192,8 @@ export default class BookSearchPlugin extends Plugin {
       await this.app.vault.adapter.writeBinary(filePath, imageData);
       return filePath;
     } catch (error) {
-      console.error('Error downloading or saving image:', error);
-      return '';
+      console.error("Error downloading or saving image:", error);
+      return "";
     }
   }
 
@@ -142,7 +201,7 @@ export default class BookSearchPlugin extends Plugin {
     try {
       const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
       if (!markdownView) {
-        console.warn('Can not find an active markdown view');
+        console.warn("Can not find an active markdown view");
         return;
       }
 
@@ -150,7 +209,7 @@ export default class BookSearchPlugin extends Plugin {
       const book = await this.searchBookMetadata(markdownView.file.basename);
 
       if (!markdownView.editor) {
-        console.warn('Can not find editor from the active markdown view');
+        console.warn("Can not find editor from the active markdown view");
         return;
       }
 
@@ -174,11 +233,14 @@ export default class BookSearchPlugin extends Plugin {
       // create new File
       const fileName = makeFileName(book, this.settings.fileNameFormat);
       const filePath = `${this.settings.folder}/${fileName}`;
-      const targetFile = await this.app.vault.create(filePath, renderedContents);
+      const targetFile = await this.app.vault.create(
+        filePath,
+        renderedContents,
+      );
 
       // if use Templater plugin
       await useTemplaterPluginInFile(this.app, targetFile);
-      this.openNewBookNote(targetFile);
+      await this.openNewBookNote(targetFile);
     } catch (err) {
       console.warn(err);
       this.showNotice(err);
@@ -191,17 +253,17 @@ export default class BookSearchPlugin extends Plugin {
     // open file
     const activeLeaf = this.app.workspace.getLeaf();
     if (!activeLeaf) {
-      console.warn('No active leaf');
+      console.warn("No active leaf");
       return;
     }
 
-    await activeLeaf.openFile(targetFile, { state: { mode: 'source' } });
-    activeLeaf.setEphemeralState({ rename: 'all' });
+    await activeLeaf.openFile(targetFile, { state: { mode: "source" } });
+    activeLeaf.setEphemeralState({ rename: "all" });
     // cursor focus
     await new CursorJumper(this.app).jumpToNextCursorLocation();
   }
 
-  async openBookSearchModal(query = ''): Promise<Book[]> {
+  async openBookSearchModal(query = ""): Promise<Book[]> {
     return new Promise((resolve, reject) => {
       return new BookSearchModal(this, query, (error, results) => {
         return error ? reject(error) : resolve(results);
@@ -211,9 +273,14 @@ export default class BookSearchPlugin extends Plugin {
 
   async openBookSuggestModal(books: Book[]): Promise<Book> {
     return new Promise((resolve, reject) => {
-      return new BookSuggestModal(this.app, this.settings.showCoverImageInSearch, books, (error, selectedBook) => {
-        return error ? reject(error) : resolve(selectedBook);
-      }).open();
+      return new BookSuggestModal(
+        this.app,
+        this.settings.showCoverImageInSearch,
+        books,
+        (error, selectedBook) => {
+          return error ? reject(error) : resolve(selectedBook);
+        },
+      ).open();
     });
   }
 
@@ -225,19 +292,19 @@ export default class BookSearchPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  async selectServiceAndSearch() {
+  selectServiceAndSearch(event?: MouseEvent) {
     const menu = new Menu();
     const services = [
-      { label: 'Google Books', value: 'google' },
-      { label: 'Goodreads', value: 'goodreads' },
-      { label: 'Calibre', value: 'calibre' },
+      { label: "Google Books", value: "google" },
+      { label: "Goodreads", value: "goodreads" },
+      { label: "Calibre", value: "calibre" },
     ];
 
-    services.forEach(service => {
-      menu.addItem(item =>
+    services.forEach((service) => {
+      menu.addItem((item) =>
         item
           .setTitle(service.label)
-          .setIcon('search')
+          .setIcon("search")
           .onClick(() => {
             this.createNewBookNote(service.value);
           }),
@@ -245,7 +312,6 @@ export default class BookSearchPlugin extends Plugin {
     });
 
     // Show menu at cursor position or center if no event
-    const event = window.event as MouseEvent;
     if (event) {
       menu.showAtMouseEvent(event);
     } else {
