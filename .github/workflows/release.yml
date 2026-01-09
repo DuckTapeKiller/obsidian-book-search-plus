@@ -5,6 +5,9 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 env:
   PLUGIN_NAME: book-search-plus
 
@@ -15,6 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fix for "Engine" error: Force Node 20
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -42,10 +46,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
+      # Fix for "Lint" error: Run build directly
+      - name: Build Plugin
         id: build
-        # We run esbuild directly to skip the 'lint' check that is blocking your release
-        run: node esbuild.config.mjs production
+        run: |
+          node --experimental-json-modules esbuild.config.mjs production
+          ls -la
 
       - name: Create Release
         id: create_release
