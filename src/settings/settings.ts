@@ -293,7 +293,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
       .setDesc("The URL of your Calibre content server")
       .addText((text) =>
         text
-          .setPlaceholder("http://localhost:8080")
+          .setPlaceholder("Example: http://localhost:8080")
           .setValue(this.plugin.settings.calibreServerUrl)
           .onChange((value) => {
             this.plugin.settings.calibreServerUrl = value;
@@ -308,7 +308,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
       )
       .addText((text) =>
         text
-          .setPlaceholder("calibre")
+          .setPlaceholder("Calibre")
           .setValue(this.plugin.settings.calibreLibraryId)
           .onChange((value) => {
             this.plugin.settings.calibreLibraryId = value;
@@ -429,7 +429,7 @@ export class BookSearchSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Google API settings description")
       .setDesc(
-        "**Warning** Please use this field only if you understand the Google Cloud API and API key security.",
+        "**Warning** Please use this field only if you understand the Google Cloud API and API key security",
       );
 
     new Setting(containerEl)
