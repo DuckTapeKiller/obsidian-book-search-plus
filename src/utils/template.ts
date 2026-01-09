@@ -78,7 +78,7 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
 
 export function getFunctionConstructor(): typeof Function {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval -- Necessary to execute inline scripts in templates
     return new Function("return (function(){}).constructor")();
   } catch (err) {
     console.warn(err);
