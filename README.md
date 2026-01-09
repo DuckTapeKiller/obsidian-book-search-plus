@@ -18,6 +18,7 @@ To import data from your local Calibre library, you must enable the Calibre Cont
 2.  Navigate to **Preferences** > **Sharing** > **Sharing over the net**.
 3.  Click **Start Server**.
 4.  Ensure the port is set to `8080` (or configure the plugin settings to match your custom port).
+5.  Go to Obsidian, open the Book Search Plus settings and make sure to put the same port for Calibre. 
 
 ## Recommended Template
 
@@ -27,30 +28,31 @@ You can customise the frontmatter to suit your workflow. Below is the recommende
 
 ```markdown
 ---
-Título: "{{title}}"
-Título original:
-Autor (a): "{{author}}"
-Traductor (a):
-Prólogo:
-Resumen: "{{description}}"
-Páginas:
-Editorial: "{{publisher}}"
-Narrador:
-Género: "{{category}}"
-isbn 10: "{{isbn10}}"
-isbn 13: "{{isbn13}}"
-ASIN:
-Fecha de publicación: "{{publishDate}}"
-Fecha de lectura:
-Portada: {{coverUrl}}
+title: "{{title}}"
+originalTitle:
+author: "{{author}}"
+translator:
+foreword:
+description: "{{description}}"
+pages:
+publisher: "{{publisher}}"
+narrator:
+category: "{{category}}"
+isbn10: "{{isbn10}}"
+isbn13: "{{isbn13}}"
+asin:
+publishDate: "{{publishDate}}"
+readDate:
+cover: "{{coverUrl}}"
 tags:
-Resaltado:
-Leído: false
+highlights:
+read: false
 ---
 
 <%*
 /* 1. Renders the image in the note body using Obsidian embedding syntax */
-const cover = tp.frontmatter["Portada"];
+/* NOTE: This section is only required for Google Books imports */
+const cover = tp.frontmatter["cover"];
 if (cover && cover !== "undefined" && cover.trim() !== "") {
     /* Since we removed brackets in frontmatter, we add them here */
     tR += `![[${cover}|300]]`;
@@ -59,7 +61,8 @@ if (cover && cover !== "undefined" && cover.trim() !== "") {
 
 <%*
 /* 2. Renaming Logic */
-const title = tp.frontmatter["Título"] || tp.frontmatter.title || "Untitled";
+/* NOTE: This section is only required for Google Books imports */
+const title = tp.frontmatter["title"] || tp.frontmatter.title || "Untitled";
 await tp.file.rename(`${title}`);
 %>
 ```
