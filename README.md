@@ -106,10 +106,12 @@ tags:
 
 **CALIBRE**
 
-
+https://github.com/user-attachments/assets/0df6fe0e-bf15-4568-8bb8-3d4a1f252737
 
 **GOODREADS**
-![How it works on mobile?](screenshots/Goodreads.mov)
+
+https://github.com/user-attachments/assets/c75e9fd9-b2ac-4555-a64e-d3710f9d6375
+
 
 
 ## Credits
