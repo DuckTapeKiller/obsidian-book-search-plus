@@ -7,6 +7,8 @@
 
 This version features a **refined UI**, **smart tag generation**, and enhanced customization options.
 
+This plugin is based on the plugin [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon).
+
 ## Features
 
 *   **Unified Service Selection**: Quickly choose your source from a compact, aesthetic modal:
@@ -116,4 +118,4 @@ https://github.com/user-attachments/assets/c75e9fd9-b2ac-4555-a64e-d3710f9d6375
 
 ## Credits
 
-Based on the original [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon). Modified by **DuckTapeKiller**.
+By **DuckTapeKiller**.
