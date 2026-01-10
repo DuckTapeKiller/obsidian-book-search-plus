@@ -147,16 +147,14 @@ body.is-mobile .modal.book-search-service-selection-modal {
   transition: all 0.2s ease;
   margin: 0;
   /* Use Theme Colors/Radius */
-  background-color: var(--interactive-normal);
-  border: 1px solid var(--background-modifier-border);
+  /* Use Theme Colors/Radius by NOT overriding them. */
+  /* background-color, color, border removed to let .mod-cta from theme take over. */
   box-shadow: none;
 }
 
 .book-search-service-selection-modal .service-selection-buttons button:hover {
   transform: none;
   /* No movement on mobile */
-  background-color: var(--interactive-hover);
-  border-color: var(--interactive-accent);
 }
 
 /* Search Modal Title Styling */
