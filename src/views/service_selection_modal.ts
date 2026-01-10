@@ -32,17 +32,25 @@ export class ServiceSelectionModal extends Modal {
       });
 
       btn.addEventListener("click", async () => {
+        // Platform-specific behavior to avoid "Lingering" on Desktop
+        // but keep "Smooth Transition" on Mobile.
+        if (Platform.isDesktop) {
+          this.close();
+          this.plugin
+            .createNewBookNote(service.value)
+            .catch((err) => console.warn(err));
+          return;
+        }
+
+        // Mobile Logic: Persistent Backdrop & Smooth Animation
         // 1. Start slide-down animation
         const closePromise = this.animateClose();
 
-        // 2. Wait a tiny bit to let animation start smoothly (avoid jank)
+        // 2. Wait a tiny bit to let animation start smoothly
         await new Promise((resolve) => setTimeout(resolve, 50));
 
-        // 3. Trigger next modal (Search)
-        // This overlaps with the tail end of the slide-down.
-        // It prevents the "300ms freeze" feeling while keeping the shade active.
+        // 3. Trigger next modal overlapping with animation
         try {
-          // Wrap in slight timeout to ensure render frame is pushed
           await new Promise<void>((resolve, reject) => {
             setTimeout(() => {
               this.plugin
@@ -52,9 +60,10 @@ export class ServiceSelectionModal extends Modal {
             }, 10);
           });
         } catch (err) {
-          console.warn(err);
+          if (err.message !== "Cancelled request") {
+            console.warn(err);
+          }
         } finally {
-          // Ensure animation is mostly done before finalizing close
           await closePromise;
           this.close();
         }

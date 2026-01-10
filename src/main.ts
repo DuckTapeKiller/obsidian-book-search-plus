@@ -247,12 +247,13 @@ export default class BookSearchPlugin extends Plugin {
         renderedContents,
       );
 
-      // if use Templater plugin
       await useTemplaterPluginInFile(this.app, targetFile);
       await this.openNewBookNote(targetFile);
     } catch (err) {
-      console.warn(err);
-      this.showNotice(err);
+      if (err.message !== "Cancelled request") {
+        console.warn(err);
+        this.showNotice(err);
+      }
     }
   }
 

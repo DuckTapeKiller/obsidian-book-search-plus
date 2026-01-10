@@ -133,5 +133,9 @@ export class BookSearchModal extends Modal {
   onClose(): void {
     const { contentEl } = this;
     contentEl.empty();
+    // Ensure callback is called to prevent hanging promises
+    if (!this.isBusy) {
+      this.callback(new Error("Cancelled request"));
+    }
   }
 }
