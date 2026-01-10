@@ -194,3 +194,16 @@ body.is-mobile .modal.book-search-service-selection-modal.is-closing {
     opacity: 0;
   }
 }
+
+/* Mobile Search Modal Positioning - Keyboard Clearance */
+body.is-mobile .modal.book-search-input-modal {
+  /* Move higher up to avoid keyboard hiding buttons */
+  position: absolute !important;
+  top: 15% !important;
+  bottom: auto !important;
+  /* Maintain horizontal centering */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  /* Reset margins */
+  margin: 0 !important;
+}

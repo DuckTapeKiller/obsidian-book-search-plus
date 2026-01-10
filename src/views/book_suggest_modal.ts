@@ -3,6 +3,7 @@ import { Book } from "@models/book.model";
 
 export class BookSuggestModal extends SuggestModal<Book> {
   showCoverImageInSearch: boolean;
+  private isSelected = false;
 
   constructor(
     app: App,
@@ -58,6 +59,13 @@ export class BookSuggestModal extends SuggestModal<Book> {
 
   // Perform action on the selected suggestion.
   onChooseSuggestion(book: Book) {
+    this.isSelected = true;
     this.onChoose(null, book);
+  }
+
+  onClose(): void {
+    if (!this.isSelected) {
+      this.onChoose(new Error("Cancelled request"));
+    }
   }
 }

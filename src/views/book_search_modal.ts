@@ -65,6 +65,7 @@ export class BookSearchModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
+    this.modalEl.addClass("book-search-input-modal");
     const service =
       this.plugin.serviceProviderOverride ||
       this.plugin.settings.serviceProvider;
