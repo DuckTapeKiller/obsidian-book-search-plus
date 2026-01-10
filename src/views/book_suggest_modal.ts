@@ -1,4 +1,4 @@
-import { App, SuggestModal } from "obsidian";
+import { App, SuggestModal, Platform } from "obsidian";
 import { Book } from "@models/book.model";
 
 export class BookSuggestModal extends SuggestModal<Book> {
@@ -64,7 +64,9 @@ export class BookSuggestModal extends SuggestModal<Book> {
   }
 
   onClose(): void {
-    if (!this.isSelected) {
+    // Only enforce explicit cancellation on Mobile to fix the shadow issue.
+    // On Desktop, this causes a race condition where valid selections are ignored.
+    if (Platform.isMobile && !this.isSelected) {
       this.onChoose(new Error("Cancelled request"));
     }
   }

@@ -1,8 +1,8 @@
 # Book Search Plus
 
-**Book Search Plus** is an Obsidian plugin that enables you to search for books and create notes containing rich metadata. It is based on [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon) but has been substantially modified. Key updates include redesigned modals, a refined structure, enhanced search options, and expanded capabilities for populating front matter.
+**Book Search Plus** is a plugin for Obsidian that allows you to search for books and create notes with rich metadata. It supports multiple providers, including **Goodreads** (via scraping), **OpenLibrary** (public API), **Calibre** (local library), and **Google Books**.
 
-This plugin supports multiple providers, including **Goodreads** (via scraping), **OpenLibrary** (public API), **Calibre** (local library), and **Google Books**. It also includes an option to automatically generate two tags for every book: the author’s name and the book title.
+This version features a **refined UI**, **smart tag generation**, and enhanced customization options.
 
 ## Features
 
@@ -98,5 +98,4 @@ tags:
 
 ## Credits
 
-By **DuckTapeKiller**.
-Based on [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon)
+Based on the original [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon). Modified by **DuckTapeKiller**.

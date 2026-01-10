@@ -16,6 +16,7 @@ export class BookSearchModal extends Modal {
   private readonly SEARCH_BUTTON_TEXT = "Search";
   private readonly REQUESTING_BUTTON_TEXT = "Requesting...";
   private isBusy = false;
+  private isSuccess = false;
   private okBtnRef?: ButtonComponent;
   private serviceProvider: BaseBooksApiImpl;
   private options: { locale: string };
@@ -54,6 +55,7 @@ export class BookSearchModal extends Modal {
       );
       if (!searchResults?.length)
         return void new Notice(`No results found for "${this.query}"`);
+      this.isSuccess = true;
       this.callback(null, searchResults);
     } catch (err) {
       this.callback(err as Error);
@@ -135,7 +137,8 @@ export class BookSearchModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
     // Ensure callback is called to prevent hanging promises
-    if (!this.isBusy) {
+    // Only error if we haven't successfully found a book
+    if (!this.isBusy && !this.isSuccess) {
       this.callback(new Error("Cancelled request"));
     }
   }

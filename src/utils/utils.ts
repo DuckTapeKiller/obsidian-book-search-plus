@@ -109,7 +109,16 @@ export function replaceVariableSyntax(book: Book, text: string): string {
 
         return result.replace(new RegExp(`{{${key}}}`, "ig"), listString);
       }
-      return result.replace(new RegExp(`{{${key}}}`, "ig"), val as string);
+      let stringVal = String(val); // Safely convert numbers/nulls to string
+      if (stringVal.includes('"')) {
+        let isOpening = true;
+        stringVal = stringVal.replace(/"/g, () => {
+          const char = isOpening ? "«" : "»";
+          isOpening = !isOpening;
+          return char;
+        });
+      }
+      return result.replace(new RegExp(`{{${key}}}`, "ig"), stringVal);
     }, text)
     .replace(/{{\w+}}/gi, "")
     .trim();
@@ -152,8 +161,14 @@ export function toStringFrontMatter(frontMatter: object): string {
       if (/\r|\n/.test(stringValue)) {
         return "";
       }
-      if (/:\s/.test(stringValue)) {
-        return `${key}: "${stringValue.replace(/"/g, "&quot;")}"\n`;
+      if (/:\s/.test(stringValue) || /"/.test(stringValue)) {
+        let isOpening = true;
+        const escapedValue = stringValue.replace(/"/g, () => {
+          const char = isOpening ? "«" : "»";
+          isOpening = !isOpening;
+          return char;
+        });
+        return `${key}: "${escapedValue}"\n`;
       }
       return `${key}: ${stringValue}\n`;
     })
@@ -224,7 +239,7 @@ export function createBookTags(book: Book): string[] {
     return str
       .toLowerCase()
       .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
+      .replace(/[^\p{L}\p{N}_]/gu, ""); // Allow all unicode letters/numbers (accents supported)
   };
 
   const tags = [];
