@@ -7,7 +7,7 @@
 
 This version features a **refined UI**, **smart tag generation**, and enhanced customization options.
 
-This plugin is based on the plugin [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon).
+This plugin is based on [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon).
 
 ## Features
 
