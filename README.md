@@ -4,6 +4,8 @@
 
 This version features a **refined UI**, **smart tag generation**, and enhanced customization options.
 
+This plugin is based on the architecture of [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon). 
+
 ## Features
 
 *   **Unified Service Selection**: Quickly choose your source from a compact, aesthetic modal:
@@ -96,6 +98,18 @@ tags:
   - tag_two
 ```
 
-## Credits
+**MOBILE FLOW**
 
-Based on the original [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon). Modified by **DuckTapeKiller**.
+![MOBILE](screenshots/screenshot_mobile_1.jpg)
+![MOBILE](screenshots/screenshot_mobile_2.jpg)
+
+**EXAMPLE CALIBRE DATA IMPORT**
+
+https://github.com/user-attachments/assets/fb176df3-e7d3-4759-a8c0-5e20e9023774
+
+**EXAMPLE GOODREADS DATA IMPORT**
+
+https://github.com/user-attachments/assets/2110c0b5-9a06-4459-93f5-60fae05c6393
+
+## Credits
+BY **DuckTapeKiller**.
