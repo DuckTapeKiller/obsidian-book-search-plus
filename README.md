@@ -4,8 +4,6 @@
 
 This plugin supports multiple providers, including **Goodreads** (via scraping), **OpenLibrary** (public API), **Calibre** (local library), and **Google Books**. It also includes an option to automatically generate two tags for every book: the author’s name and the book title.
 
-This version features a **refined UI**, **smart tag generation**, and enhanced customization options.
-
 ## Features
 
 *   **Unified Service Selection**: Quickly choose your source from a compact, aesthetic modal:
@@ -100,4 +98,5 @@ tags:
 
 ## Credits
 
-Modified by **DuckTapeKiller**.
+By **DuckTapeKiller**.
+Based on [obsidian-book-search-plugin](https://github.com/anpigon/obsidian-book-search-plugin) by [anpigon](https://github.com/anpigon)
