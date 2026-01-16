@@ -8,7 +8,7 @@ export async function getTemplateContents(
   const { metadataCache, vault } = app;
   const normalizedTemplatePath = normalizePath(templatePath ?? "");
   if (templatePath === "/") {
-    return Promise.resolve("");
+    return "";
   }
 
   try {
@@ -16,7 +16,8 @@ export async function getTemplateContents(
       normalizedTemplatePath,
       "",
     );
-    return templateFile ? vault.cachedRead(templateFile) : "";
+    // Fix: Added await to ensure we return a string, not a Promise
+    return templateFile ? await vault.cachedRead(templateFile) : "";
   } catch (err) {
     console.error(
       `Failed to read the daily note template '${normalizedTemplatePath}'`,
@@ -43,7 +44,8 @@ export function applyTemplateTransformations(
           second: now.get("second"),
         });
       if (calc) {
-        currentDate.add(parseInt(timeDelta, 10), unit);
+        // Fix: Cast unit to correct moment type to satisfy linter
+        currentDate.add(parseInt(timeDelta, 10), unit as moment.unitOfTime.DurationConstructor);
       }
 
       if (momentFormat) {
@@ -56,18 +58,19 @@ export function applyTemplateTransformations(
 
 export function executeInlineScriptsTemplates(book: Book, text: string) {
   const commandRegex = /<%(?:=)(.+)%>/g;
-  const ctor = getFunctionConstructor();
   const matchedList = [...text.matchAll(commandRegex)];
   return matchedList.reduce((result, [matched, script]) => {
     try {
-      const outputs = new ctor(
+      // Fix: Direct Function usage. NOTE: This still triggers "Implied Eval" and requires /skip
+      const func = new Function(
+        "book",
         [
-          "const [book] = arguments",
-          `const output = ${script}`,
+          "const output = " + script,
           'if(typeof output === "string") return output',
           "return JSON.stringify(output)",
-        ].join(";"),
-      )(book);
+        ].join(";")
+      );
+      const outputs = func(book);
       return result.replace(matched, outputs);
     } catch (err) {
       console.warn(err);
@@ -76,18 +79,7 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
   }, text);
 }
 
-export function getFunctionConstructor(): typeof Function {
-  try {
-    return new Function("return (function(){}).constructor")();
-  } catch (err) {
-    console.warn(err);
-    if (err instanceof SyntaxError) {
-      throw Error("Bad template syntax");
-    } else {
-      throw err;
-    }
-  }
-}
+// Removed getFunctionConstructor as it was unnecessary indirection
 
 export async function useTemplaterPluginInFile(app: App, file: TFile) {
   // @ts-ignore
