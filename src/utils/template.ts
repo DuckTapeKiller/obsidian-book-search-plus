@@ -16,14 +16,15 @@ export async function getTemplateContents(
       normalizedTemplatePath,
       "",
     );
-    // Fix: Added await to ensure we return a string, not a Promise
+    // Fix: Added await
     return templateFile ? await vault.cachedRead(templateFile) : "";
   } catch (err) {
+    // Fix: Updated error message to be relevant to this plugin
     console.error(
-      `Failed to read the daily note template '${normalizedTemplatePath}'`,
+      `Failed to read the book template '${normalizedTemplatePath}'`,
       err,
     );
-    new Notice("Failed to read the daily note template");
+    new Notice("Failed to read the book template");
     return "";
   }
 }
@@ -44,7 +45,7 @@ export function applyTemplateTransformations(
           second: now.get("second"),
         });
       if (calc) {
-        // Fix: Cast unit to correct moment type to satisfy linter
+        // Fix: Cast unit to satisfy linter
         currentDate.add(parseInt(timeDelta, 10), unit as moment.unitOfTime.DurationConstructor);
       }
 
@@ -61,7 +62,7 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
   const matchedList = [...text.matchAll(commandRegex)];
   return matchedList.reduce((result, [matched, script]) => {
     try {
-      // Fix: Direct Function usage. NOTE: This still triggers "Implied Eval" and requires /skip
+      // Fix: Direct Function usage (requires /skip implied-eval)
       const func = new Function(
         "book",
         [
@@ -78,8 +79,6 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
     return result;
   }, text);
 }
-
-// Removed getFunctionConstructor as it was unnecessary indirection
 
 export async function useTemplaterPluginInFile(app: App, file: TFile) {
   // @ts-ignore
