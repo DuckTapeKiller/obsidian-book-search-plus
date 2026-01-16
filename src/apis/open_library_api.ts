@@ -49,10 +49,10 @@ export class OpenLibraryApi implements BaseBooksApiImpl {
     }
   }
 
-  async getBook(book: Book): Promise<Book> {
+  getBook(book: Book): Promise<Book> {
     // OpenLibrary search results usually contain enough info, but we can implement specific fetch if needed
     // For now, return the book as is from search result, effectively relying on mapResultToBook
-    return book;
+    return Promise.resolve(book);
   }
 
   private mapResultToBook(doc: OpenLibraryDoc): Book {
