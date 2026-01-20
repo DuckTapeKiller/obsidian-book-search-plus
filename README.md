@@ -1,4 +1,4 @@
-# Book Search Plus
+![Book Search Plus Art](https://github.com/user-attachments/assets/8a191a9a-bb79-4348-ae78-a4a21dd560c2)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/ducktapekiller)
 
