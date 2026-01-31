@@ -34,4 +34,21 @@ export interface Book {
   asin?: string;
   tags?: string[];
   ids?: string;
+
+  // Series information
+  series?: string; // Series name
+  seriesNumber?: number | string; // Book number in series
+  seriesLink?: string; // Formatted as [[Series Name]]
+
+  // Reading progress tracking
+  currentPage?: number | string;
+  readingProgress?: number | string; // Percentage 0-100
+
+  // Custom Calibre columns (dynamic)
+  customColumns?: Record<string, unknown>;
+
+  // Source tracking for metadata updates
+  sourceProvider?: string; // 'calibre', 'goodreads', 'google', etc.
+  sourceId?: string; // ID in the source system
 }
+

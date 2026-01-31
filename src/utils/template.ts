@@ -46,7 +46,10 @@ export function applyTemplateTransformations(
         });
       if (calc) {
         // Fix: Cast unit to satisfy linter
-        currentDate.add(parseInt(timeDelta, 10), unit as moment.unitOfTime.DurationConstructor);
+        currentDate.add(
+          parseInt(timeDelta, 10),
+          unit as moment.unitOfTime.DurationConstructor,
+        );
       }
 
       if (momentFormat) {
@@ -69,7 +72,7 @@ export function executeInlineScriptsTemplates(book: Book, text: string) {
           "const output = " + script,
           'if(typeof output === "string") return output',
           "return JSON.stringify(output)",
-        ].join(";")
+        ].join(";"),
       );
       const outputs = func(book);
       return result.replace(matched, outputs);

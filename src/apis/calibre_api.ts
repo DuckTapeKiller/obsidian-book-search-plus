@@ -2,11 +2,17 @@ import { Book } from "@models/book.model";
 import { BaseBooksApiImpl } from "@apis/base_api";
 import { requestUrl } from "obsidian";
 
+interface CalibreLibraryInfo {
+  tags: string[];
+  series: Array<{ name: string; count: number }>;
+  authors: string[];
+}
+
 export class CalibreApi implements BaseBooksApiImpl {
   constructor(
     private readonly serverUrl: string,
     private readonly libraryId: string = "calibre",
-  ) {}
+  ) { }
 
   async getByQuery(query: string): Promise<Book[]> {
     try {
@@ -31,7 +37,7 @@ export class CalibreApi implements BaseBooksApiImpl {
       const bookIds: string[] = searchData.book_ids || [];
 
       // Limit results to avoid overwhelming requests
-      const topBookIds = bookIds.slice(0, 5);
+      const topBookIds = bookIds.slice(0, 20);
 
       const books = await Promise.all(
         topBookIds.map((id) => this.getBookDetails(id)),
@@ -42,6 +48,113 @@ export class CalibreApi implements BaseBooksApiImpl {
       console.warn("Calibre search error", error);
       throw error;
     }
+  }
+
+  /**
+   * Get library metadata including tags, series, and authors
+   */
+  async getLibraryInfo(): Promise<CalibreLibraryInfo> {
+    try {
+      const validLibraryId = this.libraryId || "calibre";
+
+      // Get categories/tags
+      const categoriesUrl = `${this.serverUrl}/ajax/categories/${validLibraryId}`;
+      const categoriesRes = await requestUrl({
+        url: categoriesUrl,
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+
+      const categories = categoriesRes.json || [];
+
+      // Parse out tags, series, authors from categories
+      let tags: string[] = [];
+      let series: Array<{ name: string; count: number }> = [];
+      let authors: string[] = [];
+
+      for (const category of categories) {
+        if (category.name === "tags") {
+          // Fetch tag items
+          const tagItems = await this.getCategoryItems("tags");
+          tags = tagItems.map((t: { name: string }) => t.name);
+        } else if (category.name === "series") {
+          // Fetch series items
+          const seriesItems = await this.getCategoryItems("series");
+          series = seriesItems.map((s: { name: string; count?: number }) => ({
+            name: s.name,
+            count: s.count || 0,
+          }));
+        } else if (category.name === "authors") {
+          // Fetch author items
+          const authorItems = await this.getCategoryItems("authors");
+          authors = authorItems.map((a: { name: string }) => a.name);
+        }
+      }
+
+      return { tags, series, authors };
+    } catch (error) {
+      console.warn("Failed to get library info", error);
+      return { tags: [], series: [], authors: [] };
+    }
+  }
+
+  /**
+   * Get items for a specific category (tags, series, authors)
+   */
+  private async getCategoryItems(category: string): Promise<Array<{ name: string; count?: number }>> {
+    try {
+      const validLibraryId = this.libraryId || "calibre";
+      const url = `${this.serverUrl}/ajax/category/${category}/${validLibraryId}`;
+
+      const res = await requestUrl({
+        url,
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+
+      const data = res.json;
+      // Calibre returns { items: [...], total_num: N }
+      return data.items || [];
+    } catch (error) {
+      console.warn(`Failed to get ${category} items`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Get books filtered by tag, series, or author
+   */
+  async getBooksByFilter(
+    filterType: "tags" | "series" | "authors",
+    filterValue: string,
+  ): Promise<Book[]> {
+    try {
+      // Build search query based on filter type
+      let query = "";
+      switch (filterType) {
+        case "tags":
+          query = `tags:"=${filterValue}"`;
+          break;
+        case "series":
+          query = `series:"=${filterValue}"`;
+          break;
+        case "authors":
+          query = `authors:"=${filterValue}"`;
+          break;
+      }
+
+      return await this.getByQuery(query);
+    } catch (error) {
+      console.warn("Failed to get books by filter", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all books in a specific series
+   */
+  async getBooksBySeries(seriesName: string): Promise<Book[]> {
+    return this.getBooksByFilter("series", seriesName);
   }
 
   private async getBookDetails(id: string): Promise<Book> {
@@ -62,8 +175,6 @@ export class CalibreApi implements BaseBooksApiImpl {
     const validLibraryId = this.libraryId || "calibre";
 
     // Try to find cover in data, or construct standard URL
-    // Standard Content Server URL: /get/cover/{book_id}/{library_id}
-    // If data.cover is present, it might be a relative path.
     let coverUrl = "";
     if (data.cover) {
       coverUrl = data.cover;
@@ -75,47 +186,23 @@ export class CalibreApi implements BaseBooksApiImpl {
     }
 
     // Map metadata
-    // Calibre JSON structure (typical):
-    // { title: "Title", authors: ["Author"], comments: "Desc", publisher: "Pub", pubdate: "YYYY-MM-DD...", user_categories: {}, ... }
-
     const title = data.title;
     const authors = data.authors || [];
     const author = authors.join(", ");
+
     // Clean HTML from comments/description
     const rawDescription = data.comments || "";
-    // Simple regex to strip HTML tags if needed, though Obsidian renders HTML.
-    // User requested sanitization for frontmatter earlier, so we might want to be careful.
-    // But standard description scraping keeps HTML often.
-    // Let's strip standard HTML tags for cleaner YAML if desired, or keep as is.
-    // For consistency with other scrapers, we usually keep text.
-    // Let's do a simple strip for safety or leave as is if user wants HTML.
-    // Given previous request for sanitization, text-only is safer.
     const description = rawDescription.replace(/<[^>]*>?/gm, "");
 
-    // ISBN
-    // Calibre uses 'identifiers' map. In some versions/responses it might be directly in data or inside identifiers object.
-    // The previous code looked at data.isbn. We need to look more robustly.
-    // Also, user requested: "ids: isbn:9781101535455" -> We need to return ids with just the number.
-    // However, the Book interface doesn't have 'ids'. I need to add it to Book model first or misuse another field.
-    // Wait, the user said "ids: isbn:...". This implies the output format (YAML).
-    // Let's assume the user wants this in the frontmatter.
-    // Standard Book model has isbn13, isbn10.
-    // I will look for 'isbn' in identifiers and set it to isbn13/10 or a new field if I can update the model.
-    // The plan said "ids" field. I checked book.model.ts and it DOES NOT have ids. I must add it.
-
-    // Let's first parse the identifiers properly.
-    // data.identifiers is often { isbn: "..." } or similar.
+    // ISBN parsing
     const identifiers = data.identifiers || {};
     let isbn = identifiers.isbn || data.isbn || "";
-
-    // If isbn has prefix like "isbn:", remove it. User wants ONLY the number.
     if (isbn && typeof isbn === "string") {
       isbn = isbn.replace(/^isbn:/i, "");
     }
+    const ids = isbn;
 
-    const ids = isbn; // User wants this specific field handling.
-
-    // Publisher
+    // Publisher and date
     const publisher = data.publisher || "";
     const publishDate = data.pubdate || "";
 
@@ -132,6 +219,33 @@ export class CalibreApi implements BaseBooksApiImpl {
       }
     }
 
+    // Series information
+    const seriesInfo = data.series || null;
+    const seriesIndex = data.series_index || null;
+
+    let series = "";
+    let seriesNumber: number | undefined;
+    let seriesLink = "";
+
+    if (seriesInfo) {
+      series = seriesInfo;
+      seriesLink = `[[${seriesInfo}]]`;
+      if (seriesIndex !== null && seriesIndex !== undefined) {
+        seriesNumber = typeof seriesIndex === "number" ? seriesIndex : parseFloat(seriesIndex);
+      }
+    }
+
+    // Custom columns (if available)
+    const customColumns: Record<string, unknown> = {};
+    if (data.user_metadata) {
+      for (const [key, value] of Object.entries(data.user_metadata)) {
+        const colData = value as { "#value#"?: unknown; name?: string };
+        if (colData && colData["#value#"] !== undefined) {
+          customColumns[key] = colData["#value#"];
+        }
+      }
+    }
+
     return {
       title,
       subtitle: "",
@@ -140,7 +254,7 @@ export class CalibreApi implements BaseBooksApiImpl {
       category: "",
       categories: data.tags || [],
       publisher,
-      publishDate: publishedYear, // User wanted ONLY the year
+      publishDate: publishedYear,
       totalPage: "",
       coverUrl,
       coverSmallUrl: coverUrl,
@@ -148,11 +262,19 @@ export class CalibreApi implements BaseBooksApiImpl {
       link: bookUrl,
       previewLink: bookUrl,
       isbn10: "",
-      isbn13: isbn, // Keep standard fields too
-      ids: ids, // New field
+      isbn13: isbn,
+      ids: ids,
       originalTitle: "",
       translator: "",
       narrator: "",
+      // New fields
+      series,
+      seriesNumber,
+      seriesLink,
+      customColumns,
+      sourceProvider: "calibre",
+      sourceId: id,
     };
   }
 }
+

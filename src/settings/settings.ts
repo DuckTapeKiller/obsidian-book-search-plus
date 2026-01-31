@@ -35,6 +35,13 @@ export interface BookSearchPluginSettings {
   askForLocale: boolean;
   calibreServerUrl: string;
   calibreLibraryId: string;
+
+  // New features
+  warnOnDuplicate: boolean; // Warn if book note already exists
+  searchHistory: string[]; // Last 10 searches
+  maxSearchHistory: number; // How many to keep
+  enableSeriesLinking: boolean; // Add series links automatically
+  showTemplatePreview: boolean; // Preview note before creation
 }
 
 export const DEFAULT_SETTINGS: BookSearchPluginSettings = {
@@ -56,6 +63,8 @@ ASIN: "{{asin}}"
 Fecha de publicación: "{{publishDate}}"
 Fecha de lectura:
 Portada: "{{localCoverImage}}"
+Series: "{{seriesLink}}"
+Series Number: {{seriesNumber}}
 tags:
 Resaltado:
 Leído: false
@@ -75,6 +84,13 @@ Leído: false
   askForLocale: true,
   calibreServerUrl: "http://localhost:8080",
   calibreLibraryId: "calibre",
+
+  // New features defaults
+  warnOnDuplicate: true,
+  searchHistory: [],
+  maxSearchHistory: 10,
+  enableSeriesLinking: true,
+  showTemplatePreview: false,
 };
 
 export class BookSearchSettingTab extends PluginSettingTab {
@@ -499,7 +515,75 @@ export class BookSearchSettingTab extends PluginSettingTab {
         });
       });
 
+    // Advanced Features
+    this.createHeader("Advanced features", containerEl);
+
+    new Setting(containerEl)
+      .setName("Warn on duplicate")
+      .setDesc("Show a warning before creating a note if one already exists for this book.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.warnOnDuplicate)
+          .onChange((value) => {
+            this.plugin.settings.warnOnDuplicate = value;
+            void this.plugin.saveSettings().catch((err) => console.warn(err));
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Enable series linking")
+      .setDesc("Automatically add series information and links (e.g., [[Series Name]]) to book notes.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSeriesLinking)
+          .onChange((value) => {
+            this.plugin.settings.enableSeriesLinking = value;
+            void this.plugin.saveSettings().catch((err) => console.warn(err));
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Show template preview")
+      .setDesc("Preview the rendered note before creating it.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.showTemplatePreview)
+          .onChange((value) => {
+            this.plugin.settings.showTemplatePreview = value;
+            void this.plugin.saveSettings().catch((err) => console.warn(err));
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Search history size")
+      .setDesc("Number of recent searches to remember (0 to disable).")
+      .addSlider((slider) =>
+        slider
+          .setLimits(0, 20, 1)
+          .setValue(this.plugin.settings.maxSearchHistory)
+          .setDynamicTooltip()
+          .onChange((value) => {
+            this.plugin.settings.maxSearchHistory = value;
+            void this.plugin.saveSettings().catch((err) => console.warn(err));
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Clear search history")
+      .setDesc(`Currently storing ${this.plugin.settings.searchHistory?.length || 0} search(es).`)
+      .addButton((button) =>
+        button.setButtonText("Clear").onClick(() => {
+          this.plugin.settings.searchHistory = [];
+          void this.plugin.saveSettings().then(() => {
+            new Notice("Search history cleared");
+            // Refresh to update count
+            this.display();
+          });
+        }),
+      );
+
     // Initialize visibility
     toggleServiceProviderExtraSettings();
   }
 }
+

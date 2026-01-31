@@ -10,6 +10,7 @@ import {
   Notice,
   Setting,
   TextComponent,
+  DropdownComponent,
 } from "obsidian";
 
 export class BookSearchModal extends Modal {
@@ -20,6 +21,7 @@ export class BookSearchModal extends Modal {
   private okBtnRef?: ButtonComponent;
   private serviceProvider: BaseBooksApiImpl;
   private options: { locale: string };
+  private searchInput?: TextComponent;
 
   constructor(
     private plugin: BookSearchPlugin,
@@ -55,6 +57,10 @@ export class BookSearchModal extends Modal {
       );
       if (!searchResults?.length)
         return void new Notice(`No results found for "${this.query}"`);
+
+      // Save to search history on success
+      this.plugin.addToSearchHistory(this.query);
+
       this.isSuccess = true;
       this.callback(null, searchResults);
     } catch (err) {
@@ -72,7 +78,7 @@ export class BookSearchModal extends Modal {
       this.plugin.serviceProviderOverride ||
       this.plugin.settings.serviceProvider;
 
-    // Requested format: Service Name (bold) \n Search book
+    // Title
     const titleContainer = contentEl.createDiv({
       cls: "book-search-plugin__search-modal--title",
     });
@@ -89,26 +95,57 @@ export class BookSearchModal extends Modal {
     )
       this.renderSelectLocale();
 
+    // Search input with history dropdown
+    const searchHistory = this.plugin.getSearchHistory();
+
+    if (searchHistory.length > 0) {
+      this.renderSearchHistory(searchHistory);
+    }
+
     contentEl.createDiv(
       { cls: "book-search-plugin__search-modal--input" },
       (el) => {
-        new TextComponent(el)
+        this.searchInput = new TextComponent(el)
           .setValue(this.query)
           .setPlaceholder("Search by keyword or ISBN")
-          .onChange((value) => (this.query = value))
-          .inputEl.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" && !event.isComposing) {
-              void this.searchBook();
-            }
-          });
+          .onChange((value) => (this.query = value));
+
+        this.searchInput.inputEl.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" && !event.isComposing) {
+            void this.searchBook();
+          }
+        });
+
+        // Focus the input
+        setTimeout(() => this.searchInput?.inputEl.focus(), 50);
       },
     );
+
     new Setting(this.contentEl).addButton((btn) => {
       this.okBtnRef = btn
         .setButtonText(this.SEARCH_BUTTON_TEXT)
         .setCta()
         .onClick(() => void this.searchBook());
     });
+  }
+
+  renderSearchHistory(history: string[]): void {
+    new Setting(this.contentEl)
+      .setName("Recent searches")
+      .addDropdown((dropdown) => {
+        dropdown.addOption("", "-- Select --");
+        history.forEach((search) => {
+          dropdown.addOption(search, search);
+        });
+        dropdown.onChange((value) => {
+          if (value) {
+            this.query = value;
+            if (this.searchInput) {
+              this.searchInput.setValue(value);
+            }
+          }
+        });
+      });
   }
 
   renderSelectLocale() {
@@ -143,3 +180,4 @@ export class BookSearchModal extends Modal {
     }
   }
 }
+

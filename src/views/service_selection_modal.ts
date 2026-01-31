@@ -36,9 +36,17 @@ export class ServiceSelectionModal extends Modal {
         // but keep "Smooth Transition" on Mobile.
         if (Platform.isDesktop) {
           this.close();
-          this.plugin
-            .createNewBookNote(service.value)
-            .catch((err) => console.warn(err));
+
+          // Use multi-select for Calibre
+          if (service.value === "calibre") {
+            this.plugin
+              .createMultipleCalibreNotes()
+              .catch((err) => console.warn(err));
+          } else {
+            this.plugin
+              .createNewBookNote(service.value)
+              .catch((err) => console.warn(err));
+          }
           return;
         }
 
@@ -53,10 +61,12 @@ export class ServiceSelectionModal extends Modal {
         try {
           await new Promise<void>((resolve, reject) => {
             setTimeout(() => {
-              this.plugin
-                .createNewBookNote(service.value)
-                .then(resolve)
-                .catch(reject);
+              // Use multi-select for Calibre
+              const action = service.value === "calibre"
+                ? this.plugin.createMultipleCalibreNotes()
+                : this.plugin.createNewBookNote(service.value);
+
+              action.then(resolve).catch(reject);
             }, 10);
           });
         } catch (err) {
